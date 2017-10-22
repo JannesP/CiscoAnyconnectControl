@@ -10,5 +10,8 @@ namespace CiscoAnyconnectControl.ViewModel
     {
         public string Color => "#FFBF0000";
         public string Text => "Disconnected ...";
+
+        public string ActionButtonText => "Connect";
+        public bool ActionButtonEnabled => false;
     }
 }

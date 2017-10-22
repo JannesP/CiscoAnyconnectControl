@@ -1,0 +1,119 @@
+﻿<Window x:Class="CiscoAnyconnectControl.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CiscoAnyconnectControl"
+        xmlns:vm="clr-namespace:CiscoAnyconnectControl.ViewModel"
+        mc:Ignorable="d"
+        Title="Cisco Anyconnect Control" Height="243.085" Width="404.521" Loaded="Window_Loaded">
+    <Window.Resources>
+        <vm:VpnStatusViewModel x:Key="VpnStatus" />
+        <vm:VpnDataViewModel x:Key="VpnData" />
+        <vm:SettingsViewModel x:Key="Settings" />
+        <Style TargetType="Label">
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Padding" Value="0, 0, 0, 0"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="1" />
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="1*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="1" Margin="0,10"/>
+
+        <!-- First row -->
+        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0"  HorizontalAlignment="Stretch" VerticalAlignment="Center"  Text="{Binding Source={StaticResource Settings}, Mode=TwoWay, Path=CiscoCliPath}" Margin="0,0,5,0" IsEnabled="False"/>
+            <Button Grid.Column="1" HorizontalAlignment="Right" Width="25" Content="..." ></Button>
+        </Grid>
+
+        <!-- Second row -->
+        <Grid Grid.Row="1" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="3*"/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Content="Connection:" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
+
+            <Grid Grid.Row="1" Grid.Column="0" Margin="0,0,5,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Server Address: " FontWeight="DemiBold" />
+                <TextBox Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Source={StaticResource VpnData}, Path=Address, Mode=TwoWay}" ></TextBox>
+            </Grid>
+            <Grid Grid.Row="2" Grid.Column="0" Margin="0,0,5,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Login: " FontWeight="DemiBold" />
+                <TextBox Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Source={StaticResource VpnData}, Path=Username, Mode=TwoWay}" ></TextBox>
+                <PasswordBox Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Center" Name="PwdVpnPassword" Margin="0,5,0,0" PasswordChanged="PwdVpnPassword_PasswordChanged"/>
+            </Grid>
+
+        </Grid>
+
+        <!-- Third row -->
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Content="Status:" Margin="0,0,5,0" />
+            <Canvas Grid.Column="1"  Name="CanvasStatus" Background="{Binding Path=Color, Source={StaticResource VpnStatus}, Mode=OneWay}" Width="{Binding ElementName=CanvasStatus, Path=ActualHeight, Mode=OneWay}" VerticalAlignment="Stretch" Margin="0,0,5,0"/>
+            <Label Grid.Column="2" Content="{Binding Path=Text, Source={StaticResource VpnStatus}, Mode=OneWay}" />
+            <Button Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center" Width="125" Content="{Binding Source={StaticResource VpnStatus}, Path=ActionButtonText, Mode=OneWay}" IsEnabled="{Binding Source={StaticResource VpnStatus}, Path=ActionButtonEnabled, Mode=OneWay}" />
+        </Grid>
+
+        <!-- second column -->
+        <Grid Grid.Row="1"  Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <CheckBox Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Save Password" Name="CbSavePassword"/>
+            <CheckBox Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Connect on System Startup" IsEnabled="{Binding ElementName=CbSavePassword, Path=IsChecked, Mode=OneWay}" />
+            <CheckBox Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Reconnect on connection loss" IsEnabled="{Binding ElementName=CbSavePassword, Path=IsChecked, Mode=OneWay}" />
+            <CheckBox Grid.Row="3" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Start GUI on logon" />
+            <CheckBox Grid.Row="4" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Notify after:" />
+            <Grid Grid.Row="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="Clear Changes" />
+                <Button Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="Save Canges" />
+            </Grid>
+        </Grid>
+    </Grid>
+
+
+</Window>
