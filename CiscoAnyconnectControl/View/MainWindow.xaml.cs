@@ -22,6 +22,7 @@ namespace CiscoAnyconnectControl
     public partial class MainWindow : Window
     {
         private VpnDataViewModel vpnDataViewModel = null;
+        private VpnStatusViewModel vpnStatusViewModel = null;
         private PasswordBox pwdBox = null;
 
         public MainWindow()
@@ -32,6 +33,7 @@ namespace CiscoAnyconnectControl
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             vpnDataViewModel = (VpnDataViewModel) FindResource("VpnData");
+            vpnStatusViewModel = (VpnStatusViewModel)FindResource("VpnStatus");
             pwdBox = (PasswordBox)FindName("PwdVpnPassword");
 
             pwdBox.Password = vpnDataViewModel.Password;
@@ -40,6 +42,12 @@ namespace CiscoAnyconnectControl
         private void PwdVpnPassword_PasswordChanged(object sender, RoutedEventArgs e)
         {
             vpnDataViewModel.SecurePassword = ((PasswordBox)sender).SecurePassword;
+        }
+
+        private void BtnAction_Click(object sender, RoutedEventArgs e)
+        {
+            vpnDataViewModel.SaveToModel.Execute();
+            vpnStatusViewModel.CurrentActionCommand.Execute();
         }
     }
 }

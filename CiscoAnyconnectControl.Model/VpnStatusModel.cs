@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace CiscoAnyconnectControl.Model
 {
-    class VpnStatusModel
+    public class VpnStatusModel
     {
         public enum VpnStatus
         {
-            Disconnected, Connecting, Connected, Disconnecting
+            Disconnected, Connecting, Connected, Disconnecting, Reconnecting
         }
 
         public VpnStatus Status { get; set; } = VpnStatus.Disconnected;

@@ -55,9 +55,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Command\RelayCommand.cs" />
-    <Compile Include="DAL\VpnDataFile.cs" />
-    <Compile Include="Model\VpnDataModel.cs" />
-    <Compile Include="Model\VpnStatusModel.cs" />
     <Compile Include="ViewModel\Converters\IntConverter.cs" />
     <Compile Include="ViewModel\SettingsViewModel.cs" />
     <Compile Include="ViewModel\VpnDataViewModel.cs" />
@@ -102,10 +99,21 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProtectedDataHelper\ProtectedDataHelper.csproj">
-      <Project>{62c43c62-81df-4404-8c27-12db3d0b5c3f}</Project>
-      <Name>ProtectedDataHelper</Name>
+    <ProjectReference Include="..\CiscoAnyconnectControl.Model\CiscoAnyconnectControl.Model.csproj">
+      <Project>{81307bfc-ddab-4a6f-b8cb-dd5498ab17cf}</Project>
+      <Name>CiscoAnyconnectControl.Model</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CiscoCliHelper\CiscoAnyconnectControl.CiscoCliHelper.csproj">
+      <Project>{4d636419-a89c-46e4-b30f-b4a48705a831}</Project>
+      <Name>CiscoAnyconnectControl.CiscoCliHelper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ProtectedDataHelper\CiscoAnyconnectControl.Util.csproj">
+      <Project>{62c43c62-81df-4404-8c27-12db3d0b5c3f}</Project>
+      <Name>CiscoAnyconnectControl.Util</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DAL\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

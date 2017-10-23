@@ -5,37 +5,21 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProtectedDataHelper
+namespace CiscoAnyconnectControl.Util
 {
-    class ProtectedDataHelper
+    public class ProtectedDataHelper
     {
         private static byte[] Salt => new byte[]{ 236, 74, 66, 6, 97, 113, 25, 69, 211, 75 };
 
 
         public static byte[] Protect(byte[] data)
         {
-            try
-            {
-                return ProtectedData.Protect(data, Salt, DataProtectionScope.CurrentUser);
-            }
-            catch (CryptographicException e)
-            {
-                Console.WriteLine("Data was not encrypted. An error occurred.");
-                return null;
-            }
+            return ProtectedData.Protect(data, Salt, DataProtectionScope.LocalMachine);
         }
 
         public static byte[] Unprotect(byte[] data)
         {
-            try
-            {
-                return ProtectedData.Unprotect(data, Salt, DataProtectionScope.CurrentUser);
-            }
-            catch (CryptographicException e)
-            {
-                Console.WriteLine("Data was not decrypted. An error occurred.");
-                return null;
-            }
+            return ProtectedData.Unprotect(data, Salt, DataProtectionScope.LocalMachine);
         }
 
     }

@@ -21,18 +21,18 @@ namespace CiscoAnyconnectControl.Command
         }
 
 
-        public bool CanExecute(object parameter)
+        public bool CanExecute(object parameter = null)
         {
             return this._canExecuteInternal();
         }
 
-        public void Execute(object parameter)
+        public void Execute(object parameter = null)
         {
             this._executeInternal();
         }
 
-        private static ICommand _emptyCommand;
-        public static ICommand Empty
+        private static RelayCommand _emptyCommand;
+        public static RelayCommand Empty
         {
             get { return _emptyCommand ?? (_emptyCommand = new RelayCommand(() => true, () => { })); }
         }

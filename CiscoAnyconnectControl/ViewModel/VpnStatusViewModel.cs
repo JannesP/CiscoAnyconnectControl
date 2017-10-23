@@ -34,6 +34,7 @@ namespace CiscoAnyconnectControl.ViewModel
                         break;
                     case VpnStatusModel.VpnStatus.Disconnecting:
                     case VpnStatusModel.VpnStatus.Connecting:
+                    case VpnStatusModel.VpnStatus.Reconnecting:
                         color = "yellow";
                         break;
                     default:
@@ -64,8 +65,11 @@ namespace CiscoAnyconnectControl.ViewModel
                     case VpnStatusModel.VpnStatus.Disconnecting:
                         text = "Disconnecting ...";
                         break;
+                    case VpnStatusModel.VpnStatus.Reconnecting:
+                        text = "Reconnecting ...";
+                        break;
                     default:
-                        text = "Error ...";
+                        text = $"Error ... {this.CurrStatus.Status.ToString()} is not defined.";
                         break;
                 }
 
@@ -87,6 +91,7 @@ namespace CiscoAnyconnectControl.ViewModel
                     case VpnStatusModel.VpnStatus.Connecting:
                         text = "Connecting ...";
                         break;
+                    case VpnStatusModel.VpnStatus.Reconnecting:
                     case VpnStatusModel.VpnStatus.Connected:
                         text = "Disconnect";
                         break;
@@ -111,6 +116,7 @@ namespace CiscoAnyconnectControl.ViewModel
                 {
                     case VpnStatusModel.VpnStatus.Disconnected:
                     case VpnStatusModel.VpnStatus.Connected:
+                    case VpnStatusModel.VpnStatus.Reconnecting:
                         enabled = true;
                         break;
                     case VpnStatusModel.VpnStatus.Disconnecting:
@@ -128,7 +134,8 @@ namespace CiscoAnyconnectControl.ViewModel
         private bool CanExecuteAction()
         {
             return this.CurrStatus.Status == VpnStatusModel.VpnStatus.Connected ||
-                   this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnected;
+                   this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnected ||
+                   this.CurrStatus.Status == VpnStatusModel.VpnStatus.Reconnecting;
         }
 
         private void SetupCommands()
@@ -145,14 +152,15 @@ namespace CiscoAnyconnectControl.ViewModel
             });
         }
 
-        public ICommand CurrentActionCommand
+        public RelayCommand CurrentActionCommand
         {
             get
             {
-                ICommand command = null;
+                RelayCommand command = null;
                 switch (this.CurrStatus.Status)
                 {
                     case VpnStatusModel.VpnStatus.Connected:
+                    case VpnStatusModel.VpnStatus.Reconnecting:
                         command = this.CommandDisconnectVpn;
                         break;
                         case VpnStatusModel.VpnStatus.Disconnected:
@@ -166,7 +174,7 @@ namespace CiscoAnyconnectControl.ViewModel
             }
         }
 
-        private ICommand CommandConnectVpn { get; set; }
-        private ICommand CommandDisconnectVpn { get; set; }
+        private RelayCommand CommandConnectVpn { get; set; }
+        private RelayCommand CommandDisconnectVpn { get; set; }
     }
 }

@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:CiscoAnyconnectControl"
         xmlns:vm="clr-namespace:CiscoAnyconnectControl.ViewModel"
         mc:Ignorable="d"
-        Title="Cisco Anyconnect Control" Height="236.262" Width="408.786" Loaded="Window_Loaded">
+        Title="Cisco Anyconnect Control" Height="114.1" Width="282.793" Loaded="Window_Loaded"
+        MinHeight="220" MinWidth="380">
     <Window.Resources>
         <vm:VpnStatusViewModel x:Key="VpnStatus" />
         <vm:VpnDataViewModel x:Key="VpnData" />
@@ -85,13 +86,12 @@
             <Label Grid.Column="0" Content="Status:" Margin="0,0,5,0" />
             <Canvas Grid.Column="1"  Name="CanvasStatus" Background="{Binding Path=Color, Source={StaticResource VpnStatus}, Mode=OneWay}" Width="{Binding ElementName=CanvasStatus, Path=ActualHeight, Mode=OneWay}" VerticalAlignment="Stretch" Margin="0,0,5,0"/>
             <Label Grid.Column="2" Content="{Binding Path=Text, Source={StaticResource VpnStatus}, Mode=OneWay}" />
-            <Button Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center" Width="125" Content="{Binding Source={StaticResource VpnStatus}, Path=ActionButtonText, Mode=OneWay}" IsEnabled="{Binding Source={StaticResource VpnStatus}, Path=ActionButtonEnabled, Mode=OneWay}" Command="{Binding Source={StaticResource VpnStatus}, Path=CurrentActionCommand}" />
+            <Button Grid.Column="3" HorizontalAlignment="Right" VerticalAlignment="Center" Width="125" Name="BtnAction"  Content="{Binding Source={StaticResource VpnStatus}, Path=ActionButtonText, Mode=OneWay}" IsEnabled="{Binding Source={StaticResource VpnStatus}, Path=ActionButtonEnabled, Mode=OneWay}" Click="BtnAction_Click" />
         </Grid>
 
         <!-- second column -->
         <Grid Grid.Row="1"  Grid.Column="2">
             <Grid.RowDefinitions>
-                <RowDefinition/>
                 <RowDefinition/>
                 <RowDefinition/>
                 <RowDefinition/>
@@ -111,15 +111,6 @@
                 <CheckBox Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Notify after:"  IsChecked="{Binding Source={StaticResource Settings}, Path=NotifyAfterX, Mode=TwoWay}" />
                 <TextBox Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Source={StaticResource Settings}, Path=NotifyAfterHours, Mode=TwoWay}" Width="20" Margin="5,0,0,0" />
                 <Label Content="h" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            </Grid>
-            <Grid Grid.Row="5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition Width="5" />
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="Clear Changes" />
-                <Button Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="Save Canges" />
             </Grid>
         </Grid>
     </Grid>
