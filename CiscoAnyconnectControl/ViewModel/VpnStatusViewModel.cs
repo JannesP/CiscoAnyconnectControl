@@ -4,17 +4,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using CiscoAnyconnectControl.CiscoCliWrapper;
 using CiscoAnyconnectControl.Command;
 using CiscoAnyconnectControl.Model;
+using CiscoAnyconnectControl.Model.DAL;
 
 namespace CiscoAnyconnectControl.ViewModel
 {
-    class VpnStatusViewModel
+    class VpnStatusViewModel : IDisposable
     {
+        private CliWrapper _ciscoCli; 
         public VpnStatusViewModel()
         {
             this.CurrStatus = new VpnStatusModel();
             SetupCommands();
+            SetupCli();
+        }
+
+        private void SetupCli()
+        {
+            this._ciscoCli = new CliWrapper(SettingsFile.Instance.SettingsModel.CiscoCliPath);
         }
 
         public VpnStatusModel CurrStatus { get; set; }
@@ -23,7 +32,7 @@ namespace CiscoAnyconnectControl.ViewModel
         {
             get
             {
-                var color = "";
+                string color;
                 switch (this.CurrStatus.Status)
                 {
                     case VpnStatusModel.VpnStatus.Disconnected:
@@ -49,12 +58,11 @@ namespace CiscoAnyconnectControl.ViewModel
         {
             get
             {
-                string text = null;
-
+                string text;
                 switch (this.CurrStatus.Status)
                 {
                     case VpnStatusModel.VpnStatus.Disconnected:
-                        text = this.CurrStatus.Error == null ? "Disconnected." : $"Error: {this.CurrStatus.Error}";
+                        text = this.CurrStatus.Message ?? "Disconnected.";
                         break;
                     case VpnStatusModel.VpnStatus.Connecting:
                         text = "Connecting ...";
@@ -69,7 +77,7 @@ namespace CiscoAnyconnectControl.ViewModel
                         text = "Reconnecting ...";
                         break;
                     default:
-                        text = $"Error ... {this.CurrStatus.Status.ToString()} is not defined.";
+                        text = $"Error ... {this.CurrStatus.Status} is not defined.";
                         break;
                 }
 
@@ -81,8 +89,7 @@ namespace CiscoAnyconnectControl.ViewModel
         {
             get
             {
-                string text = null;
-
+                string text;
                 switch (this.CurrStatus.Status)
                 {
                     case VpnStatusModel.VpnStatus.Disconnected:
@@ -111,7 +118,7 @@ namespace CiscoAnyconnectControl.ViewModel
         {
             get
             {
-                var enabled = false;
+                bool enabled;
                 switch (this.CurrStatus.Status)
                 {
                     case VpnStatusModel.VpnStatus.Disconnected:
@@ -131,6 +138,9 @@ namespace CiscoAnyconnectControl.ViewModel
             }
         }
 
+        private RelayCommand CommandConnectVpn { get; set; }
+        private RelayCommand CommandDisconnectVpn { get; set; }
+
         private bool CanExecuteAction()
         {
             return this.CurrStatus.Status == VpnStatusModel.VpnStatus.Connected ||
@@ -143,6 +153,7 @@ namespace CiscoAnyconnectControl.ViewModel
             this.CommandConnectVpn = new RelayCommand(this.CanExecuteAction,
             () =>
             {
+                VpnDataFile.Instance.Save();
                 Console.WriteLine("Connect VPN.");      
             });
             this.CommandDisconnectVpn = new RelayCommand(this.CanExecuteAction,
@@ -174,7 +185,14 @@ namespace CiscoAnyconnectControl.ViewModel
             }
         }
 
-        private RelayCommand CommandConnectVpn { get; set; }
-        private RelayCommand CommandDisconnectVpn { get; set; }
+        public void Dispose()
+        {
+            this._ciscoCli?.Dispose();
+        }
+
+        public void RefreshVpnStatus()
+        {
+            this._ciscoCli.UpdateStats();
+        }
     }
 }

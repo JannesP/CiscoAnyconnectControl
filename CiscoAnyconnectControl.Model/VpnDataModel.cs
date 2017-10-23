@@ -1,58 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using CiscoAnyconnectControl.Model.Annotations;
 
 namespace CiscoAnyconnectControl.Model
 {
-    public class VpnDataModel
+    [Serializable]
+    public class VpnDataModel : INotifyPropertyChanged
     {
-        public string Address { get; set; } = "vpn.example.com";
+        private string _username = "username";
+        private string _address = "vpn.example.com";
+        private string _password = "";
 
-        public string Username { get; set; } = "username";
-        
-        public SecureString SecurePassword { [SecurityCritical]get; [SecurityCritical]set; }
-
-        private static SecureString GetSecureString(string password)
+        public string Address
         {
-            var secureString = new SecureString();
-
-            foreach (char c in password)
+            get { return this._address; }
+            set
             {
-                secureString.AppendChar(c);
+                this._address = value;
+                OnPropertyChanged();
             }
+        }
 
-            secureString.MakeReadOnly();
-            return secureString;
+        public string Username
+        {
+            get { return this._username; }
+            set
+            {
+                this._username = value;
+                OnPropertyChanged();
+            }
         }
 
         public string Password
         {
-            [SecurityCritical]
-            get
-            {
-                if (this.SecurePassword == null) return "";
-                using (SecureString securePassword = this.SecurePassword)
-                {
-                    IntPtr bstr = Marshal.SecureStringToBSTR(securePassword);
-                    try
-                    {
-                        return Marshal.PtrToStringBSTR(bstr);
-                    }
-                    finally
-                    {
-                        Marshal.ZeroFreeBSTR(bstr);
-                    }
-                }
-            }
-            [SecurityCritical]
+            get { return this._password; }
             set
             {
-                this.SecurePassword = GetSecureString(value);
+                this._password = value;
+                OnPropertyChanged();
             }
+        }
+        
+        [field:NonSerialized]
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

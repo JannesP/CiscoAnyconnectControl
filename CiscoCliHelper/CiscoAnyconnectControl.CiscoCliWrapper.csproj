@@ -7,10 +7,11 @@
     <ProjectGuid>{4D636419-A89C-46E4-B30F-B4A48705A831}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CiscoCliHelper</RootNamespace>
-    <AssemblyName>CiscoCliHelper</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <RootNamespace>CiscoAnyconnectControl.CiscoCliHelper</RootNamespace>
+    <AssemblyName>CiscoAnyconnectControl.CiscoCliHelper</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,7 +41,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CiscoCli.cs" />
+    <Compile Include="CliWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CiscoAnyconnectControl.Model\CiscoAnyconnectControl.Model.csproj">
+      <Project>{81307bfc-ddab-4a6f-b8cb-dd5498ab17cf}</Project>
+      <Name>CiscoAnyconnectControl.Model</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

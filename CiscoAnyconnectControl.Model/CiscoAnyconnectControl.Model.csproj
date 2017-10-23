@@ -42,7 +42,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DAL\SettingsFile.cs" />
+    <Compile Include="DAL\Util.cs" />
     <Compile Include="DAL\VpnDataFile.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SettingsModel.cs" />
     <Compile Include="VpnDataModel.cs" />

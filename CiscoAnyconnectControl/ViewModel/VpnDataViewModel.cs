@@ -4,6 +4,7 @@ using CiscoAnyconnectControl.Model.DAL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
@@ -16,55 +17,65 @@ namespace CiscoAnyconnectControl.ViewModel
     {
         public VpnDataViewModel()
         {
-            try
-            {
-                Model = VpnDataFile.Instance.Load("");
-                Console.WriteLine("VpnDataViewModel: Model loaded.");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("VpnDataViewModel: Model failed to load.");
-                Console.WriteLine(e.GetType().ToString());
-                Console.WriteLine(e.Message);
-                Console.WriteLine(e.StackTrace);
-                Model = new VpnDataModel();
-            }
+            this.Model = VpnDataFile.Instance.VpnDataModel;
+            this.Address = this.Model.Address;
+            this.Username = this.Model.Username;
+            this.Password = this.Model.Password;
+            this.Model.PropertyChanged += Model_PropertyChanged;
+            
             SetupCommands();
         }
 
-        private VpnDataModel Model;
+        private void Model_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            PropertyInfo propertyInfo = sender.GetType().GetProperty(e.PropertyName);
+            if (propertyInfo != null)
+            {
+                PropertyInfo memberInfo = this.GetType().GetProperty(e.PropertyName);
+                if (memberInfo != null)
+                    memberInfo.SetValue(this, propertyInfo.GetValue(sender));
+            }
+        }
+
+        private VpnDataModel Model { get; set; }
 
         public string Address { get; set; } = "vpn.example.com";
         public string Username { get; set; } = "username";
-        public SecureString SecurePassword { get; set; }
-        public string Password
+
+        public string Password { get; set; } = "";
+
+        public SecureString SecurePassword
         {
-            [SecurityCritical]
-            get
+            set
             {
-                if (this.SecurePassword == null) return "";
-                using (SecureString securePassword = this.SecurePassword)
+                string pwd = "";
+                if (value != null)
                 {
-                    IntPtr bstr = Marshal.SecureStringToBSTR(securePassword);
-                    try
+                    using (SecureString securePassword = value)
                     {
-                        return Marshal.PtrToStringBSTR(bstr);
-                    }
-                    finally
-                    {
-                        Marshal.ZeroFreeBSTR(bstr);
+                        IntPtr bstr = Marshal.SecureStringToBSTR(securePassword);
+                        try
+                        {
+                            pwd = Marshal.PtrToStringBSTR(bstr);
+                        }
+                        finally
+                        {
+                            Marshal.ZeroFreeBSTR(bstr);
+                        }
                     }
                 }
+                this.Password = pwd;
             }
         }
+        
         public RelayCommand SaveToModel { get; private set; }
 
         private void SetupCommands()
         {
-            SaveToModel = new RelayCommand(this.DataChanged, () => {
-                Model.Address = this.Address;
-                Model.SecurePassword = SecurePassword;
-                Model.Username = Username;
+            this.SaveToModel = new RelayCommand(this.DataChanged, () => {
+                this.Model.Address = this.Address;
+                this.Model.Password = this.Password;
+                this.Model.Username = this.Username;
             });
         }
 

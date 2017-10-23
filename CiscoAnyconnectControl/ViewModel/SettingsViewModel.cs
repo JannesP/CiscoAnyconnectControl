@@ -6,18 +6,17 @@ using System.Text;
 using System.Threading.Tasks;
 using CiscoAnyconnectControl.ViewModel.Converters;
 using CiscoAnyconnectControl.Command;
-using Microsoft.Win32;
 using CiscoAnyconnectControl.Model;
+using CiscoAnyconnectControl.Model.DAL;
+using Microsoft.Win32;
 
 namespace CiscoAnyconnectControl.ViewModel
 {
     class SettingsViewModel
     {
-        private SettingsModel Model { get; set; }
-
         public SettingsViewModel()
         {
-            CommandSelectCiscoCli = new RelayCommand(() => true, () =>
+            this.CommandSelectCiscoCli = new RelayCommand(() => true, () =>
             {
                 OpenFileDialog ofd = new OpenFileDialog();
                 ofd.CheckFileExists = true;
@@ -28,26 +27,60 @@ namespace CiscoAnyconnectControl.ViewModel
                 bool success = ofd.ShowDialog().Value;
                 if (success)
                 {
-                    CiscoCliPath = ofd.FileName;
+                    this.CiscoCliPath = ofd.FileName;
                 }
             });
+
+            this.CommandSaveToPersistentStorage = new RelayCommand(() => true, () =>
+            {
+                SettingsFile.Instance.Save();
+            });
+
+            SettingsFile s = SettingsFile.Instance;
         }
 
-        public string CiscoCliPath { get; set; } =
-            @"C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\vpncli.exe";
+        public string CiscoCliPath
+        {
+            get { return SettingsFile.Instance.SettingsModel.CiscoCliPath; }
+            set { SettingsFile.Instance.SettingsModel.CiscoCliPath = value; }
+        }
 
-        public bool SavePassword { get; set; } = true;
+        public bool SavePassword
+        {
+            get { return SettingsFile.Instance.SettingsModel.SavePassword; }
+            set { SettingsFile.Instance.SettingsModel.SavePassword = value; }
+        }
+        public bool ConnectOnSystemStartup
+        {
+            get { return SettingsFile.Instance.SettingsModel.ConnectOnSystemStartup; }
+            set { SettingsFile.Instance.SettingsModel.ConnectOnSystemStartup = value; }
+        }
+        public bool ReconnectOnConnectionLoss
+        {
+            get { return SettingsFile.Instance.SettingsModel.ReconnectOnConnectionLoss; }
+            set { SettingsFile.Instance.SettingsModel.ReconnectOnConnectionLoss = value; }
+        }
 
-        public bool ConnectOnSystemStartup { get; set; } = true;
+        public bool StartGuiOnLogon
+        {
+            get { return SettingsFile.Instance.SettingsModel.StartGuiOnLogon; }
+            set { SettingsFile.Instance.SettingsModel.StartGuiOnLogon = value; }
+        }
 
-        public bool ReconnectOnConnectionLoss { get; set; } = true;
-
-        public bool StartGuiOnLogon { get; set; } = false;
-
-        public bool NotifyAfterX { get; set; } = true;
+        public bool NotifyAfterX
+        {
+            get { return SettingsFile.Instance.SettingsModel.NotifyAfterX; }
+            set { SettingsFile.Instance.SettingsModel.NotifyAfterX = value; }
+        }
         [TypeConverter(typeof(IntConverter))]
-        public int NotifyAfterHours { get; set; } = 9;
+        public int NotifyAfterHours
+        {
+            get { return SettingsFile.Instance.SettingsModel.NotifyAfterHours; }
+            set { SettingsFile.Instance.SettingsModel.NotifyAfterHours = value; }
+        }
 
         public RelayCommand CommandSelectCiscoCli { get; private set; }
+
+        public RelayCommand CommandSaveToPersistentStorage { get; private set; }
     }
 }
