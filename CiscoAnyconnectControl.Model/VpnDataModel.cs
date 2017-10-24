@@ -18,6 +18,7 @@ namespace CiscoAnyconnectControl.Model
         private string _username = "username";
         private string _address = "vpn.example.com";
         private string _password = "";
+        private string _profile = "";
 
         public string Address
         {
@@ -48,7 +49,17 @@ namespace CiscoAnyconnectControl.Model
                 OnPropertyChanged();
             }
         }
-        
+
+        public string Profile
+        {
+            get { return this._profile; }
+            set
+            {
+                this._profile = value;
+                OnPropertyChanged();
+            }
+        }
+
         [field:NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 

@@ -1,24 +1,90 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Threading;
 using CiscoAnyconnectControl.CiscoCliWrapper;
 using CiscoAnyconnectControl.Command;
 using CiscoAnyconnectControl.Model;
+using CiscoAnyconnectControl.Model.Annotations;
 using CiscoAnyconnectControl.Model.DAL;
 
 namespace CiscoAnyconnectControl.ViewModel
 {
-    class VpnStatusViewModel : IDisposable
+    class VpnStatusViewModel : IDisposable, INotifyPropertyChanged
     {
-        private CliWrapper _ciscoCli; 
+        private CliWrapper _ciscoCli;
+        private DispatcherTimer _timeChangedTimer;
         public VpnStatusViewModel()
         {
-            this.CurrStatus = new VpnStatusModel();
             SetupCommands();
             SetupCli();
+            this.CurrStatus = this._ciscoCli.VpnStatusModel;
+            this.CurrStatus.PropertyChanged += CurrStatus_PropertyChanged;
+            this._timeChangedTimer = new DispatcherTimer
+            {
+                IsEnabled = false,
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            this._timeChangedTimer.Tick += _timeChangedTimer_Tick;
+        }
+
+        private void _timeChangedTimer_Tick(object sender, EventArgs e)
+        {
+            if (this.CurrStatus.Status == VpnStatusModel.VpnStatus.Connected ||
+                this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnecting)
+            {
+                if (this.CurrStatus.TimeConnected == null) this._ciscoCli.UpdateStatus();
+                OnPropertyChanged(nameof(this.TimeConnected));
+            }
+        }
+        
+        public string TimeConnected
+        {
+            get
+            {
+                if (this.CurrStatus.Status == VpnStatusModel.VpnStatus.Connected ||
+                    this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnecting)
+                {
+                    if (this.CurrStatus.TimeConnected == null) return "loading ...";
+                    return $"({this.CurrStatus.TimeConnected:h\\:mm\\:ss})";
+                }
+                else
+                {
+                    return "";
+                }
+                
+            }
+        }
+
+        private void CurrStatus_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(this.Status):
+                    OnPropertyChanged(nameof(this.Color));
+                    OnPropertyChanged(nameof(this.Status));
+                    OnPropertyChanged(nameof(this.ActionButtonText));
+                    OnPropertyChanged(nameof(this.ActionButtonEnabled));
+                    if (this.CurrStatus.Status == VpnStatusModel.VpnStatus.Connected ||
+                        this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnecting)
+                    {
+                        this._timeChangedTimer.Start();
+                    }
+                    else
+                    {
+                        this._timeChangedTimer.Stop();
+                    }
+                    
+                    break;
+                case nameof(this.Message):
+                    OnPropertyChanged(e.PropertyName);
+                    break;
+            }
         }
 
         private void SetupCli()
@@ -54,7 +120,7 @@ namespace CiscoAnyconnectControl.ViewModel
             }
         }
 
-        public string Text
+        public string Status
         {
             get
             {
@@ -62,7 +128,7 @@ namespace CiscoAnyconnectControl.ViewModel
                 switch (this.CurrStatus.Status)
                 {
                     case VpnStatusModel.VpnStatus.Disconnected:
-                        text = this.CurrStatus.Message ?? "Disconnected.";
+                        text = "Disconnected.";
                         break;
                     case VpnStatusModel.VpnStatus.Connecting:
                         text = "Connecting ...";
@@ -84,6 +150,8 @@ namespace CiscoAnyconnectControl.ViewModel
                 return text;
             }
         }
+
+        public string Message => this.CurrStatus.Message ?? "No messages yet :(";
 
         public string ActionButtonText
         {
@@ -154,12 +222,12 @@ namespace CiscoAnyconnectControl.ViewModel
             () =>
             {
                 VpnDataFile.Instance.Save();
-                Console.WriteLine("Connect VPN.");      
+                this._ciscoCli.Connect(VpnDataFile.Instance.VpnDataModel.Address, VpnDataFile.Instance.VpnDataModel.Profile, VpnDataFile.Instance.VpnDataModel.Username, VpnDataFile.Instance.VpnDataModel.Password);
             });
             this.CommandDisconnectVpn = new RelayCommand(this.CanExecuteAction,
             () =>
             {
-                Console.WriteLine("Disconnect VPN.");
+                this._ciscoCli.Disconnect();
             });
         }
 
@@ -192,7 +260,15 @@ namespace CiscoAnyconnectControl.ViewModel
 
         public void RefreshVpnStatus()
         {
-            this._ciscoCli.UpdateStats();
+            this._ciscoCli.UpdateStatus();
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

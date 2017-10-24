@@ -26,7 +26,6 @@ namespace CiscoAnyconnectControl.View
         private VpnStatusViewModel _vpnStatusViewModel = null;
         private SettingsViewModel _settingsViewModel = null;
         private PasswordBox _pwdBox = null;
-        private DispatcherTimer _dispatcherTimer;
 
         public MainWindow()
         {
@@ -40,14 +39,6 @@ namespace CiscoAnyconnectControl.View
             this._settingsViewModel = (SettingsViewModel) FindResource("Settings");
             this._pwdBox = (PasswordBox)FindName("PwdVpnPassword");
             this._pwdBox.Password = this._vpnDataViewModel.Password;
-
-            this._dispatcherTimer = new DispatcherTimer(new TimeSpan(TimeSpan.TicksPerSecond * 5), DispatcherPriority.Normal, this._dispatcherTimer_Tick, Dispatcher.CurrentDispatcher);
-            this._dispatcherTimer.Start();
-        }
-
-        private void _dispatcherTimer_Tick(object sender, EventArgs e)
-        {
-            this._vpnStatusViewModel.RefreshVpnStatus();
         }
 
         private void PwdVpnPassword_PasswordChanged(object sender, RoutedEventArgs e)
@@ -63,9 +54,13 @@ namespace CiscoAnyconnectControl.View
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            this._dispatcherTimer.Stop();
             this._settingsViewModel.CommandSaveToPersistentStorage.Execute();
             this._vpnStatusViewModel.Dispose();
+        }
+
+        private void CbSavePassword_Unchecked(object sender, RoutedEventArgs e)
+        {
+            this._pwdBox.Password = "";
         }
     }
 }

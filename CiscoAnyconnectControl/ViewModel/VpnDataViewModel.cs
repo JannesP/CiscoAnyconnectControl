@@ -15,6 +15,8 @@ namespace CiscoAnyconnectControl.ViewModel
 {
     class VpnDataViewModel
     {
+        private string _password = "";
+
         public VpnDataViewModel()
         {
             this.Model = VpnDataFile.Instance.VpnDataModel;
@@ -31,6 +33,7 @@ namespace CiscoAnyconnectControl.ViewModel
             PropertyInfo propertyInfo = sender.GetType().GetProperty(e.PropertyName);
             if (propertyInfo != null)
             {
+                if (e.PropertyName == nameof(this.Profile)) return;
                 PropertyInfo memberInfo = this.GetType().GetProperty(e.PropertyName);
                 if (memberInfo != null)
                     memberInfo.SetValue(this, propertyInfo.GetValue(sender));
@@ -42,7 +45,24 @@ namespace CiscoAnyconnectControl.ViewModel
         public string Address { get; set; } = "vpn.example.com";
         public string Username { get; set; } = "username";
 
-        public string Password { get; set; } = "";
+        public string Password
+        {
+            get { return this._password; }
+            set
+            {
+                this._password = value;
+                if (!SettingsFile.Instance.SettingsModel.SavePassword)
+                {
+                    this.Model.Password = "";
+                }
+            }
+        }
+
+        public string Profile
+        {
+            get { return this.Model.Profile; }
+            set { this.Model.Profile = value; }
+        }
 
         public SecureString SecurePassword
         {
@@ -70,12 +90,20 @@ namespace CiscoAnyconnectControl.ViewModel
         
         public RelayCommand SaveToModel { get; private set; }
 
+        public RelayCommand RemoveProfile { get; private set; }
+
+        public bool IsRemoveProfileButtonEnabled => this.Profile != "";
+
         private void SetupCommands()
         {
             this.SaveToModel = new RelayCommand(this.DataChanged, () => {
                 this.Model.Address = this.Address;
-                this.Model.Password = this.Password;
+                if (SettingsFile.Instance.SettingsModel.SavePassword)
+                    this.Model.Password = this.Password;
                 this.Model.Username = this.Username;
+            });
+            this.RemoveProfile = new RelayCommand(() => this.IsRemoveProfileButtonEnabled, () => {
+                this.Profile = "";
             });
         }
 

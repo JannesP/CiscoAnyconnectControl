@@ -5,8 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CiscoAnyconnectControl.CiscoCliHelper;
 using CiscoAnyconnectControl.Model;
-using CiscoCliHelper;
 
 // ReSharper disable once CheckNamespace
 namespace CiscoAnyconnectControl.CiscoCliWrapper
@@ -24,11 +24,22 @@ namespace CiscoAnyconnectControl.CiscoCliWrapper
         {
             this.Cli.UpdateStatus();
         }
-        public VpnStatusModel VpnStatusModel { get; set; }
+
+        public VpnStatusModel VpnStatusModel => this.Cli.VpnStatusModel;
 
         public void Dispose()
         {
             this.Cli?.Dispose();
+        }
+
+        public void Disconnect()
+        {
+            this.Cli.Disconnect();
+        }
+
+        public void Connect(string address, string profile, string username, string password)
+        {
+            Trace.TraceError("CliWrapper: Not implemented yet!");
         }
     }
 }
