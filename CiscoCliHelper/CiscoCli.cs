@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CiscoAnyconnectControl.Model;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace CiscoCliHelper
     {
         private Process _ciscoCli;
         private Dictionary<string, string> _states;
+        private VpnStatusModel VpnStatusModel;
 
         public CiscoCli(string path)
         {
@@ -35,6 +37,7 @@ namespace CiscoCliHelper
             this._ciscoCli.Start();
             this._ciscoCli.BeginOutputReadLine();
             this._ciscoCli.BeginErrorReadLine();
+            VpnStatusModel = new VpnStatusModel();
         }
 
         private void _ciscoCli_ErrorDataReceived(object sender, DataReceivedEventArgs e)
@@ -55,17 +58,62 @@ namespace CiscoCliHelper
         private void _ciscoCli_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             Console.WriteLine($"CISCO:\t{e.Data}");
-            string[] parts = e.Data.Split(new[]{':'}, 2);
-            if (parts.Length == 2)
+            if (e.Data.StartsWith("  >>"))
             {
-                this._states[parts[0]] = parts[1];
+                string[] parts = e.Data.Split(new[] { ':' }, 2);
+                if (parts.Length == 2)
+                {
+                    parts[0] = parts[0].TrimStart('>', ' ').Trim();
+                    parts[1] = parts[1].TrimStart('>', ' ').Trim();
+                    this._states[parts[0]] = parts[1];
+                }
+                ParseState(parts[0], parts[1]);
             }
         }
 
-        public void SendCommand(CliCommand command)
+        private void ParseState(string state, string value)
+        {
+            switch (state)
+            {
+                case "notice":
+                    VpnStatusModel.Message = value;
+                    break;
+                case "state":
+                    try
+                    {
+                        VpnStatusModel.Status = (VpnStatusModel.VpnStatus)Enum.Parse(typeof(VpnStatusModel.VpnStatus), value, true);
+                    } catch { Trace.TraceWarning($"CiscoCli: Enum value {value} is not defined for VpnStatus while parsing {state}"); }
+                    break;
+                case "Time Connected":
+                    VpnStatusModel.TimeConnected = TimeSpan.ParseExact(value, new[] { "hh:mm:ss", "hhh:mm:ss", "hhhh:mm:ss" }, null);
+                    break;
+            }
+        }
+
+        private void ParseStates()
+        {
+            var keys = _states.Keys;
+            foreach (var key in keys)
+            {
+                ParseState(key, _states[key]);
+            }
+        }
+
+        private void SendCommand(CliCommand command)
         {
             string cmd = command.ToString().ToLower();
             this._ciscoCli.StandardInput.WriteLine(cmd);
+        }
+
+        public void UpdateStatus()
+        {
+            SendCommand(CliCommand.Stats);
+            SendCommand(CliCommand.State);
+        }
+
+        public void Disconnect()
+        {
+            SendCommand(CliCommand.Disconnect);
         }
 
         public void Dispose()

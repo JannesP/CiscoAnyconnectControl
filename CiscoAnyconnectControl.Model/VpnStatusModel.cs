@@ -13,6 +13,8 @@ namespace CiscoAnyconnectControl.Model
     {
         private VpnStatus _status = VpnStatus.Disconnected;
         private string _message = null;
+        private DateTime _timeConnectedLastValueSetAt = DateTime.MinValue;
+        private TimeSpan _timeConnectedLastValue = TimeSpan.MinValue;
 
         public enum VpnStatus
         {
@@ -25,7 +27,26 @@ namespace CiscoAnyconnectControl.Model
             set
             {
                 this._status = value;
-                OnPropertyChanged(nameof(this.Status));
+                OnPropertyChanged();
+            }
+        }
+
+        public TimeSpan TimeConnected {
+            get
+            {
+                if (this.Status == VpnStatus.Connected || this.Status == VpnStatus.Disconnecting)
+                {
+                    return _timeConnectedLastValue + (DateTime.Now - _timeConnectedLastValueSetAt);
+                } else
+                {
+                    return TimeSpan.MinValue;
+                }
+            }
+            set
+            {
+                _timeConnectedLastValueSetAt = DateTime.Now;
+                _timeConnectedLastValue = value;
+                OnPropertyChanged();
             }
         }
 
@@ -35,7 +56,7 @@ namespace CiscoAnyconnectControl.Model
             set
             {
                 this._message = value;
-                OnPropertyChanged(nameof(this.Message));
+                OnPropertyChanged();
             }
         }
 

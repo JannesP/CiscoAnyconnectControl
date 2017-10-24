@@ -20,9 +20,9 @@ namespace CiscoAnyconnectControl.CiscoCliWrapper
             this.Cli = new CiscoCli(executablePath);
         }
 
-        public void UpdateStats()
+        public void UpdateStatus()
         {
-            this.Cli.SendCommand(CiscoCli.CliCommand.Disconnect);
+            this.Cli.UpdateStatus();
         }
         public VpnStatusModel VpnStatusModel { get; set; }
 
