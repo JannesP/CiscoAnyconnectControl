@@ -60,8 +60,8 @@ namespace CiscoAnyconnectControl.ViewModel
 
         public string Profile
         {
-            get { return this.Model.Profile; }
-            set { this.Model.Profile = value; }
+            get { return this.Model.Group; }
+            set { this.Model.Group = value; }
         }
 
         public SecureString SecurePassword

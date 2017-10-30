@@ -107,9 +107,9 @@
       <Project>{4d636419-a89c-46e4-b30f-b4a48705a831}</Project>
       <Name>CiscoAnyconnectControl.CiscoCliWrapper</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ProtectedDataHelper\CiscoAnyconnectControl.Util.csproj">
+    <ProjectReference Include="..\ProtectedDataHelper\CiscoAnyconnectControl.Utility.csproj">
       <Project>{62c43c62-81df-4404-8c27-12db3d0b5c3f}</Project>
-      <Name>CiscoAnyconnectControl.Util</Name>
+      <Name>CiscoAnyconnectControl.Utility</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

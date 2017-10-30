@@ -18,7 +18,7 @@ namespace CiscoAnyconnectControl.Model
         private string _username = "username";
         private string _address = "vpn.example.com";
         private string _password = "";
-        private string _profile = "";
+        private string _profile = null;
 
         public string Address
         {
@@ -50,7 +50,7 @@ namespace CiscoAnyconnectControl.Model
             }
         }
 
-        public string Profile
+        public string Group
         {
             get { return this._profile; }
             set

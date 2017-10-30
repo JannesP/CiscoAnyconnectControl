@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CiscoAnyconnectControl.Model;
 using System.IO;
-using CiscoAnyconnectControl.Util;
+using CiscoAnyconnectControl.Utility;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace CiscoAnyconnectControl.Model.DAL

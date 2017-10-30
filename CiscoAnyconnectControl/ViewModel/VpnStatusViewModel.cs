@@ -7,17 +7,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
-using CiscoAnyconnectControl.CiscoCliWrapper;
 using CiscoAnyconnectControl.Command;
 using CiscoAnyconnectControl.Model;
+using CiscoAnyconnectControl.Utility;
 using CiscoAnyconnectControl.Model.Annotations;
 using CiscoAnyconnectControl.Model.DAL;
+using CiscoAnyconnectControl.CiscoCliHelper;
 
 namespace CiscoAnyconnectControl.ViewModel
 {
     class VpnStatusViewModel : IDisposable, INotifyPropertyChanged
     {
-        private CliWrapper _ciscoCli;
+        private CiscoCli _ciscoCli;
         private DispatcherTimer _timeChangedTimer;
         public VpnStatusViewModel()
         {
@@ -89,7 +90,7 @@ namespace CiscoAnyconnectControl.ViewModel
 
         private void SetupCli()
         {
-            this._ciscoCli = new CliWrapper(SettingsFile.Instance.SettingsModel.CiscoCliPath);
+            this._ciscoCli = new CiscoCli(SettingsFile.Instance.SettingsModel.CiscoCliPath);
         }
 
         public VpnStatusModel CurrStatus { get; set; }
@@ -219,10 +220,22 @@ namespace CiscoAnyconnectControl.ViewModel
         private void SetupCommands()
         {
             this.CommandConnectVpn = new RelayCommand(this.CanExecuteAction,
-            () =>
+            async () =>
             {
+                var mdl = VpnDataFile.Instance.VpnDataModel;
+                if (mdl.Group == null)
+                {
+                    try
+                    {
+                        IEnumerable<string> groups = await this._ciscoCli.LoadGroups(mdl.Address);
+                    }
+                    catch (Exception ex)
+                    {
+                        Util.TraceException($"Error finding groups for host {mdl.Address}:", ex);
+                    }
+                }
                 VpnDataFile.Instance.Save();
-                this._ciscoCli.Connect(VpnDataFile.Instance.VpnDataModel.Address, VpnDataFile.Instance.VpnDataModel.Profile, VpnDataFile.Instance.VpnDataModel.Username, VpnDataFile.Instance.VpnDataModel.Password);
+                this._ciscoCli.Connect(VpnDataFile.Instance.VpnDataModel.Address, VpnDataFile.Instance.VpnDataModel.Group, VpnDataFile.Instance.VpnDataModel.Username, VpnDataFile.Instance.VpnDataModel.Password);
             });
             this.CommandDisconnectVpn = new RelayCommand(this.CanExecuteAction,
             () =>

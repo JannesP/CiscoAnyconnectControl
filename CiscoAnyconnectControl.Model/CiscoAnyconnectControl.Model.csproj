@@ -42,7 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DAL\SettingsFile.cs" />
-    <Compile Include="DAL\Util.cs" />
     <Compile Include="DAL\VpnDataFile.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -51,9 +50,9 @@
     <Compile Include="VpnStatusModel.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProtectedDataHelper\CiscoAnyconnectControl.Util.csproj">
+    <ProjectReference Include="..\ProtectedDataHelper\CiscoAnyconnectControl.Utility.csproj">
       <Project>{62c43c62-81df-4404-8c27-12db3d0b5c3f}</Project>
-      <Name>CiscoAnyconnectControl.Util</Name>
+      <Name>CiscoAnyconnectControl.Utility</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

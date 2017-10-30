@@ -42,13 +42,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CiscoCli.cs" />
-    <Compile Include="CliWrapper.cs" />
+    <Compile Include="CliProcess.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CiscoAnyconnectControl.Model\CiscoAnyconnectControl.Model.csproj">
       <Project>{81307bfc-ddab-4a6f-b8cb-dd5498ab17cf}</Project>
       <Name>CiscoAnyconnectControl.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ProtectedDataHelper\CiscoAnyconnectControl.Utility.csproj">
+      <Project>{62c43c62-81df-4404-8c27-12db3d0b5c3f}</Project>
+      <Name>CiscoAnyconnectControl.Utility</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
