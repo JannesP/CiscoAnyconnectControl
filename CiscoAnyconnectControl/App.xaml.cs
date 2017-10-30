@@ -92,7 +92,9 @@ namespace CiscoAnyconnectControl
                     }
 
                 }
-                proc.Close();
+                proc.CloseMainWindow();
+                proc.WaitForExit(50);
+                proc.Kill();
             }
             return true;
         }

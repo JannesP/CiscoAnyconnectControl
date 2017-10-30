@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CiscoAnyconnectControl.View"
         mc:Ignorable="d"
-        Title="Select Account Group" Height="105" Width="235" MinHeight="105" MinWidth="235" >
+        Title="Select Account Group" Height="140" Width="260" MinHeight="105" MinWidth="235"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}" >
     <Window.Resources>
         <Style TargetType="Button">
             <Setter Property="Width" Value="100"></Setter>
@@ -13,17 +14,15 @@
     </Window.Resources>
     <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height=".5*"/>
+            <RowDefinition Height=".5*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Label Grid.Column="0" Grid.Row="0" Content="Group:" HorizontalAlignment="Left" VerticalAlignment="Center" />
-        <ComboBox Name="CbGroups" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" SelectedIndex="0">
-            <ComboBoxItem Cursor="None" Content="Examplecontent"/>
-        </ComboBox>
+        <ComboBox Name="CbGroups" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" SelectedIndex="0"/>
         <Grid Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0" Margin="0,5,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>

@@ -7,7 +7,7 @@
         xmlns:vm="clr-namespace:CiscoAnyconnectControl.ViewModel"
         mc:Ignorable="d"
         Title="Cisco Anyconnect Control" Height="255" Width="400" Loaded="Window_Loaded"
-        MinHeight="255" MinWidth="400" Closing="Window_Closing" >
+        MinHeight="275" MinWidth="400" Closing="Window_Closing" >
     <Window.Resources>
         <vm:VpnStatusViewModel x:Key="VpnStatus" />
         <vm:VpnDataViewModel x:Key="VpnData" />
@@ -27,6 +27,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="1*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="1" Margin="0,5"/>
@@ -108,9 +109,11 @@
             <Label Grid.Column="0" Content="{Binding Path=Status, Source={StaticResource VpnStatus}, Mode=OneWay}" Margin="0,0,5,0" />
             <Label Grid.Column="1" Content="{Binding Path=TimeConnected, Source={StaticResource VpnStatus}, Mode=OneWay}" Margin="0,0,5,0" />
             <Canvas Grid.Column="2"  Name="CanvasStatus" Background="{Binding Path=Color, Source={StaticResource VpnStatus}, Mode=OneWay}" Width="{Binding ElementName=CanvasStatus, Path=ActualHeight, Mode=OneWay}" VerticalAlignment="Stretch" Margin="0,0,5,0"/>
-            <Label Grid.Column="3" Content="{Binding Path=Message, Source={StaticResource VpnStatus}, Mode=OneWay}" />
             <Button Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center" Width="125" Name="BtnAction"  Content="{Binding Source={StaticResource VpnStatus}, Path=ActionButtonText, Mode=OneWay}" IsEnabled="{Binding Source={StaticResource VpnStatus}, Path=ActionButtonEnabled, Mode=OneWay}" Click="BtnAction_Click" />
         </Grid>
+
+        <!-- Fourth row -->
+        <Label Grid.Row="3" Grid.ColumnSpan="3"  Grid.Column="0" Content="{Binding Path=Message, Source={StaticResource VpnStatus}, Mode=OneWay}" FontStyle="Italic" Margin="0,5,0,0" HorizontalAlignment="Center"/>
 
         <!-- second column -->
         <Grid Grid.Row="1"  Grid.Column="2">

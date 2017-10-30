@@ -242,7 +242,7 @@ namespace CiscoAnyconnectControl.ViewModel
                     }
                 }
                 VpnDataFile.Instance.Save();
-                this._ciscoCli.Connect(VpnDataFile.Instance.VpnDataModel.Address, VpnDataFile.Instance.VpnDataModel.Group, VpnDataFile.Instance.VpnDataModel.Username, VpnDataFile.Instance.VpnDataModel.Password);
+                this._ciscoCli.Connect(VpnDataFile.Instance.VpnDataModel.Address, VpnDataFile.Instance.VpnDataModel.Username, VpnDataFile.Instance.VpnDataModel.Password, VpnDataFile.Instance.VpnDataModel.Group);
             });
             this.CommandDisconnectVpn = new RelayCommand(this.CanExecuteAction,
             () =>

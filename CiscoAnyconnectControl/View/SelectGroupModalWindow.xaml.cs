@@ -24,21 +24,21 @@ namespace CiscoAnyconnectControl.View
         private ComboBox _cbGroups;
         public SelectGroupModalWindow([NotNull]IEnumerable<string> options)
         {
+            InitCommands();
             InitializeComponent();
             this._cbGroups = (ComboBox) FindName("CbGroups");
             if (this._cbGroups == null) throw new Exception("Error initializing window, CbGroups not found.");
             this._cbGroups.ItemsSource = options;
-
-            InitCommands();
         }
 
-        public SelectGroupModalWindow() : this(new List<string>()) { }
+        public SelectGroupModalWindow() : this(new List<string> {"ExampleItem"}) { }
 
         public string SelectedGroup { get; private set; }
 
         private void InitCommands()
         {
-            this.OkCommand = new RelayCommand(() => this._cbGroups.SelectedIndex != -1, () =>
+            //TODO replace CanExecute with something useful
+            this.OkCommand = new RelayCommand(() => true, () =>
             {
                 this.DialogResult = true;
                 this.SelectedGroup = (string) this._cbGroups.SelectedItem;

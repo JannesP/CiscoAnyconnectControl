@@ -4,6 +4,8 @@ using System.Diagnostics;
 using CiscoAnyconnectControl.Model;
 using CiscoAnyconnectControl.Utility;
 using System.IO;
+using System.Runtime.InteropServices.ComTypes;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CiscoAnyconnectControl.CiscoCliHelper
@@ -11,22 +13,36 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
     public class CiscoCli : IDisposable
     {
         private CliProcess _ciscoCli;
-        private Dictionary<string, string> _states;
-        private string path;
+        private readonly Dictionary<string, string> _states;
+        private readonly string _path;
         public VpnStatusModel VpnStatusModel { get; } = new VpnStatusModel();
 
         public CiscoCli(string path)
         {
             if (!File.Exists(path)) throw new ArgumentException("The executable doesnt exist!", nameof(path));
             this._states = new Dictionary<string, string>();
+            this._path = path;
+            CreateNewCli(path);
+        }
+
+        private void CreateNewCli(string path)
+        {
+            StopCurrentCli();
             this._ciscoCli = new CliProcess(path);
-            this._ciscoCli.OutputDataReceived += _ciscoCli_OutputDataReceived;
+            this._ciscoCli.OutputDataReceived += _ciscoCli_ReceiveOutputData;
             this._ciscoCli.ErrorDataReceived += _ciscoCli_ErrorDataReceived;
             this._ciscoCli.Exited += _ciscoCli_Exited;
             this._ciscoCli.Start();
             this._ciscoCli.BeginOutputReadLine();
             this._ciscoCli.BeginErrorReadLine();
             this.UpdateStatus();
+        }
+
+        private void StopCurrentCli()
+        {
+            this._ciscoCli?.Kill();
+            this._ciscoCli?.Dispose();
+            this._ciscoCli = null;
         }
 
         public TimeSpan Timeout { get; set; } = new TimeSpan(TimeSpan.TicksPerSecond * 5);
@@ -40,48 +56,72 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
         {
             if (this.VpnStatusModel.Status == VpnStatusModel.VpnStatus.Disconnected)
             {
+                StopCurrentCli();
                 var groups = new List<string>();
-                using (var cli = new CliProcess(this._ciscoCli.StartInfo.FileName))
+                try
                 {
-                    cli.Start();
-                    cli.BeginOutputReadLine();
-
-                    cli.SendCommand(CliProcess.Command.Connect, address);
-                    var finished = false;
-                    var q = new Queue<string>();
-                    while (!finished)
+                    using (var cli = new CliProcess(this._path))
                     {
-                        string s = await cli.StandardOutput.ReadLineAsync().TimeoutAfter(this.Timeout);
-                        s = s.Trim(' ', '>').Trim();
-                        if (s.StartsWith("Group:")) finished = true;
-                        else if (s.StartsWith("error:")) throw new Exception(s.Replace("error: ", ""));
-                        else q.Enqueue(s);
-                    }
+                        cli.Start();
+                        try
+                        {
 
-                    var searchingForGroups = true;
-                    while (q.Count > 0 && searchingForGroups)
-                    {
-                        if (q.Dequeue().StartsWith("Awaiting user input.")) searchingForGroups = false;
-                    }
+                            await cli.SendCommand(CliProcess.Command.Connect, address);
+                            TimeSpan localTimeout = this.Timeout;
+                            var q = new Queue<string>();
+                            try
+                            {
+                                while (true)
+                                {
+                                    string s = await cli.StandardOutput.ReadLineAsync().TimeoutAfter(localTimeout);
+                                    Trace.TraceInformation("CLI_GROUPS: " + s);
+                                    s = s.Trim(' ', '>').Trim();
+                                    if (s.StartsWith("Awaiting user input."))
+                                    {
+                                        localTimeout = new TimeSpan(this.Timeout.Ticks / 10);
+                                        q.Enqueue(s);
+                                    }
+                                    else if (s.StartsWith("error:")) throw new Exception(s.Replace("error: ", ""));
+                                    else q.Enqueue(s);
+                                }
+                            }
+                            catch (TimeoutException) { }
 
-                    while (q.Count > 0)
-                    {
-                        string line = q.Dequeue();
-                        line = line.Remove(0, line.IndexOf(')') + 2);
-                        Trace.TraceInformation($"Found group: {line}.");
-                        groups.Add(line);
-                    }
+                            var searchingForGroups = true;
+                            while (q.Count > 0 && searchingForGroups)
+                            {
+                                if (q.Dequeue().StartsWith("Awaiting user input.")) searchingForGroups = false;
+                            }
 
-                    cli.Kill();
+                            while (q.Count > 0)
+                            {
+                                string line = q.Dequeue();
+                                if (line.Length == 0) continue;
+                                line = line.Remove(0, line.IndexOf(')') + 2);
+                                Trace.TraceInformation($"Found group: {line}.");
+                                groups.Add(line);
+                            }
+
+                        }
+                        finally
+                        {
+                            cli.Kill();
+                        }
+                    }
+                }
+                finally
+                {
+                    CreateNewCli(this._path);
                 }
                 return groups;
             }
             throw new InvalidOperationException("The vpn needs to be disonnected for the profile list to be loaded.");
         }
 
-        public void Connect(string address, string username, string password, string profile)
+        public void Connect(string address, string username, string password, string group)
         {
-            if (profile == null) throw new ArgumentException($"{nameof(profile)} cannot be null!", nameof(profile));
+            if (group == null) throw new ArgumentException($"{nameof(group)} cannot be null. Please use LoadGroups in case you dont have it.", nameof(group));
+            this._ciscoCli?.SendCompleteConnect(address, username, password, group);
         }
 
         private void _ciscoCli_Exited(object sender, EventArgs e)
@@ -89,9 +129,15 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
             Trace.TraceInformation("Cisco client exited.");
         }
 
-        private void _ciscoCli_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        private void _ciscoCli_ReceiveOutputData(object sender, DataReceivedEventArgs e)
         {
             Console.WriteLine($"CISCO:\t{e.Data}");
+            if (e.Data == null)
+            {
+                Trace.TraceWarning("Received null in _ciscoCli_ReceiveOutputData.");
+                return;
+            }
+            
             string[] parts = e.Data.Split(new[] { ':' }, 2);
             if (parts.Length == 2)
             {
@@ -139,20 +185,21 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
             }
         }
 
-        public void UpdateStatus()
+        public async void UpdateStatus()
         {
-            this._ciscoCli.SendCommand(CliProcess.Command.Stats);
-            this._ciscoCli.SendCommand(CliProcess.Command.State);
+            if (this._ciscoCli == null) return;
+            await this._ciscoCli.SendCommand(CliProcess.Command.Stats);
+            await this._ciscoCli.SendCommand(CliProcess.Command.State);
         }
 
-        public void Disconnect()
+        public async void Disconnect()
         {
-            this._ciscoCli.SendCommand(CliProcess.Command.Disconnect);
+            if (this._ciscoCli == null) return;
+            await this._ciscoCli.SendCommand(CliProcess.Command.Disconnect);
         }
 
         public void Dispose()
         {
-            this._ciscoCli.OutputDataReceived -= _ciscoCli_OutputDataReceived;
             this._ciscoCli?.Kill();
             this._ciscoCli?.Dispose();
         }
