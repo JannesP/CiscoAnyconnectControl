@@ -10,8 +10,9 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
 {
     public class CiscoCli : IDisposable
     {
-        private Process _ciscoCli;
+        private CliProcess _ciscoCli;
         private Dictionary<string, string> _states;
+        private string path;
         public VpnStatusModel VpnStatusModel { get; } = new VpnStatusModel();
 
         public CiscoCli(string path)
@@ -35,48 +36,47 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
             Console.WriteLine($"CISCO_ERROR:\t{e.Data}");
         }
 
-        public enum CliCommand
-        {
-            Connect, Disconnect, Stats, State
-        }
-
         public async Task<IEnumerable<string>> LoadGroups(string address)
         {
             if (this.VpnStatusModel.Status == VpnStatusModel.VpnStatus.Disconnected)
             {
-                SendCommand(CliCommand.Connect, address);
-                bool finished = false;
-                var q = new Queue<string>();
-                while (!finished)
-                {
-                    string s = await this._ciscoCli.StandardOutput.ReadLineAsync().TimeoutAfter(Timeout);
-                    s = s.Trim(new[] { ' ', '>' }).Trim();
-                    if (s.StartsWith("Group:")) finished = true;
-                    else if (s.StartsWith("error:")) throw new Exception(s.Replace("error: ", ""));
-                    else q.Enqueue(s);
-                }
-
-                var searchingForGroups = true;
-                while (q.Count > 0 && searchingForGroups)
-                {
-                    string line = q.Dequeue();
-                    if (line.StartsWith("Awaiting user input.")) searchingForGroups = false;
-                }
                 var groups = new List<string>();
-                while (q.Count > 0)
+                using (var cli = new CliProcess(this._ciscoCli.StartInfo.FileName))
                 {
-                    string line = q.Dequeue();
-                    line = line.Remove(0, line.IndexOf(')') + 2);
-                    Trace.TraceInformation($"Found group: {line}.");
-                    groups.Add(line);
+                    cli.Start();
+                    cli.BeginOutputReadLine();
+
+                    cli.SendCommand(CliProcess.Command.Connect, address);
+                    var finished = false;
+                    var q = new Queue<string>();
+                    while (!finished)
+                    {
+                        string s = await cli.StandardOutput.ReadLineAsync().TimeoutAfter(this.Timeout);
+                        s = s.Trim(' ', '>').Trim();
+                        if (s.StartsWith("Group:")) finished = true;
+                        else if (s.StartsWith("error:")) throw new Exception(s.Replace("error: ", ""));
+                        else q.Enqueue(s);
+                    }
+
+                    var searchingForGroups = true;
+                    while (q.Count > 0 && searchingForGroups)
+                    {
+                        if (q.Dequeue().StartsWith("Awaiting user input.")) searchingForGroups = false;
+                    }
+
+                    while (q.Count > 0)
+                    {
+                        string line = q.Dequeue();
+                        line = line.Remove(0, line.IndexOf(')') + 2);
+                        Trace.TraceInformation($"Found group: {line}.");
+                        groups.Add(line);
+                    }
+
+                    cli.Kill();
                 }
                 return groups;
-
             }
-            else
-            {
-                throw new InvalidOperationException("The vpn needs to be disonnected for the profile list to be loaded.");
-            }
+            throw new InvalidOperationException("The vpn needs to be disonnected for the profile list to be loaded.");
         }
 
         public void Connect(string address, string username, string password, string profile)
@@ -139,26 +139,15 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
             }
         }
 
-        private void SendCommand(CliCommand command, string param = null)
-        {
-            string cmd = command.ToString().ToLower();
-            if (param != null)
-            {
-                cmd += $" {param}";
-            }
-            this._ciscoCli.StandardInput.WriteLine(cmd);
-
-        }
-
         public void UpdateStatus()
         {
-            SendCommand(CliCommand.Stats);
-            SendCommand(CliCommand.State);
+            this._ciscoCli.SendCommand(CliProcess.Command.Stats);
+            this._ciscoCli.SendCommand(CliProcess.Command.State);
         }
 
         public void Disconnect()
         {
-            SendCommand(CliCommand.Disconnect);
+            this._ciscoCli.SendCommand(CliProcess.Command.Disconnect);
         }
 
         public void Dispose()

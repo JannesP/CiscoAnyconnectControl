@@ -11,7 +11,7 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
     {
         public CliProcess(string path)
         {
-            StartInfo = new ProcessStartInfo
+            this.StartInfo = new ProcessStartInfo
             {
                 FileName = path,
                 Arguments = "-s",
@@ -22,6 +22,21 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
                 CreateNoWindow = true,
                 ErrorDialog = true
             };
+        }
+
+        public enum Command
+        {
+            Connect, Disconnect, Stats, State
+        }
+
+        public void SendCommand(Command command, string param = null)
+        {
+            string cmd = command.ToString().ToLower();
+            if (param != null)
+            {
+                cmd += $" {param}";
+            }
+            this.StandardInput.WriteLine(cmd);
         }
     }
 }

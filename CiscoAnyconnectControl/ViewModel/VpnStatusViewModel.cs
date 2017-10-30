@@ -13,6 +13,7 @@ using CiscoAnyconnectControl.Utility;
 using CiscoAnyconnectControl.Model.Annotations;
 using CiscoAnyconnectControl.Model.DAL;
 using CiscoAnyconnectControl.CiscoCliHelper;
+using CiscoAnyconnectControl.View;
 
 namespace CiscoAnyconnectControl.ViewModel
 {
@@ -51,14 +52,9 @@ namespace CiscoAnyconnectControl.ViewModel
                 if (this.CurrStatus.Status == VpnStatusModel.VpnStatus.Connected ||
                     this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnecting)
                 {
-                    if (this.CurrStatus.TimeConnected == null) return "loading ...";
-                    return $"({this.CurrStatus.TimeConnected:h\\:mm\\:ss})";
+                    return this.CurrStatus.TimeConnected == null ? "loading ..." : $"({this.CurrStatus.TimeConnected:h\\:mm\\:ss})";
                 }
-                else
-                {
-                    return "";
-                }
-                
+                return "";
             }
         }
 
@@ -222,12 +218,23 @@ namespace CiscoAnyconnectControl.ViewModel
             this.CommandConnectVpn = new RelayCommand(this.CanExecuteAction,
             async () =>
             {
-                var mdl = VpnDataFile.Instance.VpnDataModel;
+                //TODO test this command
+                VpnDataModel mdl = VpnDataFile.Instance.VpnDataModel;
                 if (mdl.Group == null)
                 {
                     try
                     {
                         IEnumerable<string> groups = await this._ciscoCli.LoadGroups(mdl.Address);
+                        var selectBox = new SelectGroupModalWindow(groups);
+                        bool? dr = selectBox.ShowDialog();
+                        if (dr == true)
+                        {
+                            mdl.Group = selectBox.SelectedGroup;
+                        }
+                        else
+                        {
+                            return;
+                        }
                     }
                     catch (Exception ex)
                     {

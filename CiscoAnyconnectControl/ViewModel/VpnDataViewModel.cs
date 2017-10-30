@@ -33,7 +33,7 @@ namespace CiscoAnyconnectControl.ViewModel
             PropertyInfo propertyInfo = sender.GetType().GetProperty(e.PropertyName);
             if (propertyInfo != null)
             {
-                if (e.PropertyName == nameof(this.Profile)) return;
+                if (e.PropertyName == nameof(this.Group)) return;
                 PropertyInfo memberInfo = this.GetType().GetProperty(e.PropertyName);
                 if (memberInfo != null)
                     memberInfo.SetValue(this, propertyInfo.GetValue(sender));
@@ -58,10 +58,10 @@ namespace CiscoAnyconnectControl.ViewModel
             }
         }
 
-        public string Profile
+        public string Group
         {
-            get { return this.Model.Group; }
-            set { this.Model.Group = value; }
+            get => this.Model.Group;
+            set => this.Model.Group = value;
         }
 
         public SecureString SecurePassword
@@ -90,9 +90,9 @@ namespace CiscoAnyconnectControl.ViewModel
         
         public RelayCommand SaveToModel { get; private set; }
 
-        public RelayCommand RemoveProfile { get; private set; }
+        public RelayCommand RemoveGroup { get; private set; }
 
-        public bool IsRemoveProfileButtonEnabled => this.Profile != "";
+        public bool IsRemoveProfileButtonEnabled => this.Group != "";
 
         private void SetupCommands()
         {
@@ -102,8 +102,8 @@ namespace CiscoAnyconnectControl.ViewModel
                     this.Model.Password = this.Password;
                 this.Model.Username = this.Username;
             });
-            this.RemoveProfile = new RelayCommand(() => this.IsRemoveProfileButtonEnabled, () => {
-                this.Profile = "";
+            this.RemoveGroup = new RelayCommand(() => this.IsRemoveProfileButtonEnabled, () => {
+                this.Group = null;
             });
         }
 

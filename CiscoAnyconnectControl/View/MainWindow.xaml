@@ -68,14 +68,14 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="1*"/>
                 </Grid.RowDefinitions>
-                <Label Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Profile: " FontWeight="DemiBold" />
+                <Label Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Group: " FontWeight="DemiBold" />
                 <Grid Grid.Row="2" Grid.Column="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="40"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Source={StaticResource VpnData}, Path=Profile, Mode=OneWay}" IsEnabled="False" Margin="0,0,5,0" />
-                    <Button Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="Delete" Height="18" Command="{Binding Source={StaticResource VpnData}, Path=RemoveProfile, Mode=OneWay}" IsEnabled="{Binding Source={StaticResource VpnData}, Path=IsRemoveProfileButtonEnabled}" />
+                    <TextBox Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Source={StaticResource VpnData}, Path=Group, Mode=OneWay}" IsEnabled="False" Margin="0,0,5,0" />
+                    <Button Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="Delete" Height="18" Command="{Binding Source={StaticResource VpnData}, Path=RemoveGroup, Mode=OneWay}" IsEnabled="{Binding Source={StaticResource VpnData}, Path=IsRemoveProfileButtonEnabled}" />
                 </Grid>
             </Grid>
 

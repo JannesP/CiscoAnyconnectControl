@@ -38,7 +38,7 @@ namespace CiscoAnyconnectControl.View
             this._vpnStatusViewModel = (VpnStatusViewModel) FindResource("VpnStatus");
             this._settingsViewModel = (SettingsViewModel) FindResource("Settings");
             this._pwdBox = (PasswordBox)FindName("PwdVpnPassword");
-            this._pwdBox.Password = this._vpnDataViewModel.Password;
+            if (this._pwdBox != null) this._pwdBox.Password = this._vpnDataViewModel.Password;
         }
 
         private void PwdVpnPassword_PasswordChanged(object sender, RoutedEventArgs e)
