@@ -7,8 +7,8 @@
     <ProjectGuid>{62C43C62-81DF-4404-8C27-12DB3D0B5C3F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ProtectedDataHelper</RootNamespace>
-    <AssemblyName>ProtectedDataHelper</AssemblyName>
+    <RootNamespace>CiscoAnyconnectControl.Utility</RootNamespace>
+    <AssemblyName>CiscoAnyconnectControl.Utility</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

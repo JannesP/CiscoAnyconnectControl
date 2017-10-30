@@ -50,7 +50,7 @@
     <Compile Include="VpnStatusModel.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProtectedDataHelper\CiscoAnyconnectControl.Utility.csproj">
+    <ProjectReference Include="..\CiscoAnyconnectControl.Utility\CiscoAnyconnectControl.Utility.csproj">
       <Project>{62c43c62-81df-4404-8c27-12db3d0b5c3f}</Project>
       <Name>CiscoAnyconnectControl.Utility</Name>
     </ProjectReference>
