@@ -67,6 +67,7 @@ namespace CiscoAnyconnectControl.ViewModel
                     OnPropertyChanged(nameof(this.Status));
                     OnPropertyChanged(nameof(this.ActionButtonText));
                     OnPropertyChanged(nameof(this.ActionButtonEnabled));
+                    OnPropertyChanged(nameof(this.TimeConnected));
                     if (this.CurrStatus.Status == VpnStatusModel.VpnStatus.Connected ||
                         this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnecting)
                     {
@@ -219,17 +220,16 @@ namespace CiscoAnyconnectControl.ViewModel
             async () =>
             {
                 //TODO test this command
-                VpnDataModel mdl = VpnDataFile.Instance.VpnDataModel;
-                if (mdl.Group == null)
+                if (VpnDataFile.Instance.VpnDataModel.Group == null)
                 {
                     try
                     {
-                        IEnumerable<string> groups = await this._ciscoCli.LoadGroups(mdl.Address);
+                        IEnumerable<string> groups = await this._ciscoCli.LoadGroups(VpnDataFile.Instance.VpnDataModel.Address);
                         var selectBox = new SelectGroupModalWindow(groups);
                         bool? dr = selectBox.ShowDialog();
                         if (dr == true)
                         {
-                            mdl.Group = selectBox.SelectedGroup;
+                            VpnDataFile.Instance.VpnDataModel.Group = selectBox.SelectedGroup;
                         }
                         else
                         {
@@ -238,7 +238,7 @@ namespace CiscoAnyconnectControl.ViewModel
                     }
                     catch (Exception ex)
                     {
-                        Util.TraceException($"Error finding groups for host {mdl.Address}:", ex);
+                        Util.TraceException($"Error finding groups for host {VpnDataFile.Instance.VpnDataModel.Address}:", ex);
                     }
                 }
                 VpnDataFile.Instance.Save();

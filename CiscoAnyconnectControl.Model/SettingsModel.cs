@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using CiscoAnyconnectControl.Model.Annotations;
 
 namespace CiscoAnyconnectControl.Model
@@ -22,71 +18,78 @@ namespace CiscoAnyconnectControl.Model
 
         public string CiscoCliPath
         {
-            get { return this._ciscoCliPath; }
+            get => this._ciscoCliPath;
             set
             {
+                if (this._ciscoCliPath == value) return;
                 this._ciscoCliPath = value;
-                OnPropertyChanged(nameof(this.CiscoCliPath));
+                OnPropertyChanged();
             }
         }
 
         public bool SavePassword
         {
-            get { return this._savePassword; }
+            get => this._savePassword;
             set
             {
+                if (this._savePassword == value) return;
                 this._savePassword = value;
-                OnPropertyChanged(nameof(this.SavePassword));
+                OnPropertyChanged();
             }
         }
 
         public bool ConnectOnSystemStartup
         {
-            get { return this._connectOnSystemStartup; }
+            get => this._connectOnSystemStartup;
             set
             {
+                if (this._connectOnSystemStartup == value) return;
                 this._connectOnSystemStartup = value;
-                OnPropertyChanged(nameof(this.ConnectOnSystemStartup));
+                OnPropertyChanged();
             }
         }
 
         public bool ReconnectOnConnectionLoss
         {
-            get { return this._reconnectOnConnectionLoss; }
+            get => this._reconnectOnConnectionLoss;
             set
             {
+                if (this._reconnectOnConnectionLoss == value) return;
                 this._reconnectOnConnectionLoss = value;
-                OnPropertyChanged(nameof(this.ReconnectOnConnectionLoss));
+                OnPropertyChanged();
             }
         }
 
         public bool StartGuiOnLogon
         {
-            get { return this._startGuiOnLogon; }
+            get => this._startGuiOnLogon;
             set
             {
+                if (this._startGuiOnLogon == value) return;
                 this._startGuiOnLogon = value;
-                OnPropertyChanged(nameof(this.StartGuiOnLogon));
+                OnPropertyChanged();
             }
         }
 
         public bool NotifyAfterX
         {
-            get { return this._notifyAfterX; }
+            get => this._notifyAfterX;
             set
             {
+                if (this._notifyAfterX == value) return;
                 this._notifyAfterX = value;
-                OnPropertyChanged(nameof(this.NotifyAfterX));
+                OnPropertyChanged();
             }
         }
 
         public int NotifyAfterHours
         {
-            get { return this._notifyAfterHours; }
+            get => this._notifyAfterHours;
             set
             {
+                if (this._notifyAfterHours == value) return;
                 this._notifyAfterHours = value;
-                OnPropertyChanged(nameof(this.NotifyAfterHours));
+                OnPropertyChanged();
             }
         }
 

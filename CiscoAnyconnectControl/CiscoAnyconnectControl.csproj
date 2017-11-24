@@ -106,6 +106,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CiscoAnyconnectControl.IPC\CiscoAnyconnectControl.IPC.csproj">
+      <Project>{c02c137f-5602-40ab-a584-f4d3a23663d1}</Project>
+      <Name>CiscoAnyconnectControl.IPC</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CiscoAnyconnectControl.Model\CiscoAnyconnectControl.Model.csproj">
       <Project>{81307bfc-ddab-4a6f-b8cb-dd5498ab17cf}</Project>
       <Name>CiscoAnyconnectControl.Model</Name>

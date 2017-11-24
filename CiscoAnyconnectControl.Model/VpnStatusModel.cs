@@ -26,7 +26,15 @@ namespace CiscoAnyconnectControl.Model
             get { return this._status; }
             set
             {
+                if (this._status == value) return;
                 this._status = value;
+                switch (value)
+                {
+                    case VpnStatus.Disconnected:
+                        this.Message = $"{value.ToString()}.";
+                        this.TimeConnected = null;
+                        break;
+                }
                 OnPropertyChanged();
             }
         }
@@ -39,9 +47,10 @@ namespace CiscoAnyconnectControl.Model
                 {
                     if (this._timeConnectedLastValue == null) return null;
                     return this._timeConnectedLastValue + (DateTime.Now - this._timeConnectedLastValueSetAt);
-                } else
+                }
+                else
                 {
-                    return TimeSpan.MinValue;
+                    return null;
                 }
             }
             set
@@ -54,9 +63,10 @@ namespace CiscoAnyconnectControl.Model
 
         public string Message
         {
-            get { return this._message; }
+            get => this._message;
             set
             {
+                if (this._message == value) return;
                 this._message = value;
                 OnPropertyChanged();
             }

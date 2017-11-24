@@ -23,6 +23,7 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
             this._states = new Dictionary<string, string>();
             this._path = path;
             CreateNewCli(path);
+            this.UpdateStatus();
         }
 
         private void CreateNewCli(string path)
@@ -35,11 +36,12 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
             this._ciscoCli.Start();
             this._ciscoCli.BeginOutputReadLine();
             this._ciscoCli.BeginErrorReadLine();
-            this.UpdateStatus();
         }
 
         private void StopCurrentCli()
         {
+            this._ciscoCli?.CancelOutputRead();
+            this._ciscoCli?.CancelErrorRead();
             this._ciscoCli?.Kill();
             this._ciscoCli?.Dispose();
             this._ciscoCli = null;

@@ -18,13 +18,14 @@ namespace CiscoAnyconnectControl.Model
         private string _username = "username";
         private string _address = "vpn.example.com";
         private string _password = "";
-        private string _profile = null;
+        private string _group = null;
 
         public string Address
         {
-            get { return this._address; }
+            get => this._address;
             set
             {
+                if (this._address == value) return;
                 this._address = value;
                 OnPropertyChanged();
             }
@@ -32,9 +33,10 @@ namespace CiscoAnyconnectControl.Model
 
         public string Username
         {
-            get { return this._username; }
+            get => this._username;
             set
             {
+                if (this._username == value) return;
                 this._username = value;
                 OnPropertyChanged();
             }
@@ -42,9 +44,10 @@ namespace CiscoAnyconnectControl.Model
 
         public string Password
         {
-            get { return this._password; }
+            get => this._password;
             set
             {
+                if (this._password == value) return;
                 this._password = value;
                 OnPropertyChanged();
             }
@@ -52,10 +55,11 @@ namespace CiscoAnyconnectControl.Model
 
         public string Group
         {
-            get { return this._profile; }
+            get => this._group;
             set
             {
-                this._profile = value;
+                if (this._group == value) return;
+                this._group = value;
                 OnPropertyChanged();
             }
         }

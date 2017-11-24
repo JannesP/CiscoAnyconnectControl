@@ -59,7 +59,7 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
 
         public async Task SendCompleteConnect(string host, string username, string password, string group)
         {
-            string connectCommand = string.Format("{1}{0}{2}{0}{3}{0}{4}{0}"
+            string connectCommand = string.Format("{1}{0}{2}{0}{3}{0}{4}"
                 , Environment.NewLine
                 , $"connect {host}"
                 , group
@@ -71,7 +71,7 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
                 await this._semaphoreWriteInput.WaitAsync();
                 try
                 {
-                    await this.StandardInput.WriteAsync(connectCommand);
+                    await this.StandardInput.WriteLineAsync(connectCommand);
                 }
                 catch (Exception ex)
                 {
