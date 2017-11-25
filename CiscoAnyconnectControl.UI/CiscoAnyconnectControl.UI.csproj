@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{36A3E90A-B3D6-46C6-BD2C-159F0960B79C}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>CiscoAnyconnectControl</RootNamespace>
+    <RootNamespace>CiscoAnyconnectControl.UI</RootNamespace>
     <AssemblyName>CiscoAnyconnectControl</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

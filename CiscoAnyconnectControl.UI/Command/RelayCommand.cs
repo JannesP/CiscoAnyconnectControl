@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace CiscoAnyconnectControl.Command
+namespace CiscoAnyconnectControl.UI.Command
 {
     class RelayCommand : ICommand
     {

@@ -7,15 +7,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
-using CiscoAnyconnectControl.Command;
+using CiscoAnyconnectControl.UI.Command;
 using CiscoAnyconnectControl.Model;
 using CiscoAnyconnectControl.Utility;
 using CiscoAnyconnectControl.Model.Annotations;
 using CiscoAnyconnectControl.Model.DAL;
 using CiscoAnyconnectControl.CiscoCliHelper;
-using CiscoAnyconnectControl.View;
+using CiscoAnyconnectControl.UI.View;
 
-namespace CiscoAnyconnectControl.ViewModel
+namespace CiscoAnyconnectControl.UI.ViewModel
 {
     class VpnStatusViewModel : IDisposable, INotifyPropertyChanged
     {

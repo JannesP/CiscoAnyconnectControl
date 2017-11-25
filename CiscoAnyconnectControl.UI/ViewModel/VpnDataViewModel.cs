@@ -1,4 +1,4 @@
-﻿using CiscoAnyconnectControl.Command;
+﻿using CiscoAnyconnectControl.UI.Command;
 using CiscoAnyconnectControl.Model;
 using CiscoAnyconnectControl.Model.DAL;
 using System;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CiscoAnyconnectControl.Model.Annotations;
 
-namespace CiscoAnyconnectControl.ViewModel
+namespace CiscoAnyconnectControl.UI.ViewModel
 {
     class VpnDataViewModel : INotifyPropertyChanged
     {

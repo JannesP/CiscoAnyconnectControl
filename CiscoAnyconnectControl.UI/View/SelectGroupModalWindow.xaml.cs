@@ -11,17 +11,17 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using CiscoAnyconnectControl.Command;
 using CiscoAnyconnectControl.Model.Annotations;
+using CiscoAnyconnectControl.UI.Command;
 
-namespace CiscoAnyconnectControl.View
+namespace CiscoAnyconnectControl.UI.View
 {
     /// <summary>
     /// Interaction logic for SelectGroupModalWindow.xaml
     /// </summary>
     public partial class SelectGroupModalWindow : Window
     {
-        private ComboBox _cbGroups;
+        private readonly ComboBox _cbGroups;
         public SelectGroupModalWindow([NotNull]IEnumerable<string> options)
         {
             InitCommands();

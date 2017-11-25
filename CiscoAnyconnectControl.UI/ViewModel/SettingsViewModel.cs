@@ -7,15 +7,15 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using CiscoAnyconnectControl.ViewModel.Converters;
-using CiscoAnyconnectControl.Command;
+using CiscoAnyconnectControl.UI.ViewModel.Converters;
+using CiscoAnyconnectControl.UI.Command;
 using CiscoAnyconnectControl.Model;
 using CiscoAnyconnectControl.Model.Annotations;
 using CiscoAnyconnectControl.Model.DAL;
 using CiscoAnyconnectControl.Utility;
 using Microsoft.Win32;
 
-namespace CiscoAnyconnectControl.ViewModel
+namespace CiscoAnyconnectControl.UI.ViewModel
 {
     class SettingsViewModel : INotifyPropertyChanged
     {

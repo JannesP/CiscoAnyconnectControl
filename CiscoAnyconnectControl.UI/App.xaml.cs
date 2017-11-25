@@ -8,9 +8,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using CiscoAnyconnectControl.View;
+using CiscoAnyconnectControl.UI.View;
 
-namespace CiscoAnyconnectControl
+namespace CiscoAnyconnectControl.UI
 {
     /// <summary>
     /// Interaction logic for App.xaml
