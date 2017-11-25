@@ -7,7 +7,7 @@ namespace CiscoAnyconnectControl.IPC.Contracts
     /// <summary>
     /// Contract that defines the methods the service will provide.
     /// </summary>
-    [ServiceContract(CallbackContract = typeof(IVpnControlClient))]
+    [ServiceContract(SessionMode = SessionMode.Required, CallbackContract = typeof(IVpnControlClient))]
     public interface IVpnControlService
     {
         [OperationContract]
@@ -18,19 +18,19 @@ namespace CiscoAnyconnectControl.IPC.Contracts
         [ServiceKnownType(typeof(VpnDataModelTo))]
         void Connect(VpnDataModelTo vpnData);
 
-        [OperationContract]
+        [OperationContract(IsOneWay = true)]
         void Disconnect();
 
-        [OperationContract]
+        [OperationContract(IsOneWay = true)]
         void SubscribeToStatusModelChanges();
 
-        [OperationContract]
+        [OperationContract(IsOneWay = true)]
         void UnSubscribeFromStatusModelChanges();
 
         [OperationContract]
         Task<string[]> GetGroupsForHost(string address);
 
-        [OperationContract]
+        [OperationContract(IsOneWay = true)]
         void UpdateStatus();
     }
 }

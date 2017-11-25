@@ -9,7 +9,7 @@ namespace CiscoAnyconnectControl.IPC.Contracts
 {
     public interface IVpnControlClient
     {
-        [OperationContract]
+        [OperationContract(IsOneWay = true)]
         void StatusModelPropertyChanged(string propertyName, object value);
     }
 }

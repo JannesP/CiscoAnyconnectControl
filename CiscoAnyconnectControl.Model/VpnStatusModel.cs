@@ -23,7 +23,7 @@ namespace CiscoAnyconnectControl.Model
 
         public VpnStatus Status
         {
-            get { return this._status; }
+            get => this._status;
             set
             {
                 if (this._status == value) return;

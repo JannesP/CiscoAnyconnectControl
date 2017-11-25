@@ -14,26 +14,29 @@ namespace CiscoAnyconnectControl.IPC.DTOs
     {
         public static VpnStatusModelTo FromModel(VpnStatusModel mdl)
         {
-            return new VpnStatusModelTo
+            var x = new VpnStatusModelTo
             {
-                Status = mdl.Status,
                 ConnectedSince = DateTime.Now - mdl.TimeConnected,
-                Message = mdl.Message
+                Message = mdl.Message,
+                Status = mdl.Status.ToString()
             };
+            return x;
         }
 
         public VpnStatusModel ToModel()
         {
-            return new VpnStatusModel
+            var x = new VpnStatusModel
             {
-                Status = this.Status,
                 TimeConnected = DateTime.Now - this.ConnectedSince,
                 Message = this.Message
             };
+            Enum.TryParse(this.Status, out VpnStatusModel.VpnStatus st);
+            x.Status = st;
+            return x;
         }
 
         [DataMember]
-        public VpnStatusModel.VpnStatus Status { get; set; }
+        public string Status { get; set; }
         
         [CanBeNull]
         [DataMember]

@@ -33,6 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
@@ -53,6 +54,14 @@
     <ProjectReference Include="..\CiscoAnyconnectControl.IPC\CiscoAnyconnectControl.IPC.csproj">
       <Project>{c02c137f-5602-40ab-a584-f4d3a23663d1}</Project>
       <Name>CiscoAnyconnectControl.IPC</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CiscoAnyConnectControl.Service\CiscoAnyConnectControl.Service.csproj">
+      <Project>{B0D8309E-4FFD-4942-A80E-1393FF478680}</Project>
+      <Name>CiscoAnyConnectControl.Service</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CiscoAnyconnectControl.Utility\CiscoAnyconnectControl.Utility.csproj">
+      <Project>{62C43C62-81DF-4404-8C27-12DB3D0B5C3F}</Project>
+      <Name>CiscoAnyconnectControl.Utility</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

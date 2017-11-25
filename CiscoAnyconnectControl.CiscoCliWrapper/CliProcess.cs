@@ -9,7 +9,7 @@ using CiscoAnyconnectControl.Utility;
 
 namespace CiscoAnyconnectControl.CiscoCliHelper
 {
-    class CliProcess : Process
+    internal sealed class CliProcess : Process
     {
         private readonly SemaphoreSlim _semaphoreWriteInput = new SemaphoreSlim(1, 1);
         public CliProcess(string path)
@@ -32,8 +32,15 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
             Connect, Disconnect, Stats, State
         }
 
+        /// <summary>
+        /// Caution! NEVER call this with stats on a disconnected vpn!
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public async Task SendCommand(Command command, string param = null)
         {
+            
             string cmd = command.ToString().ToLower();
             if (param != null)
             {
@@ -44,34 +51,8 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
                 await this._semaphoreWriteInput.WaitAsync();
                 try
                 {
+                    Console.WriteLine("Writing: " + cmd);
                     await this.StandardInput.WriteLineAsync(cmd);
-                }
-                catch (Exception ex)
-                {
-                    Utility.Util.TraceException("Error writing to cli stdin.", ex);
-                }
-            }
-            finally
-            {
-                this._semaphoreWriteInput.Release();
-            }
-        }
-
-        public async Task SendCompleteConnect(string host, string username, string password, string group)
-        {
-            string connectCommand = string.Format("{1}{0}{2}{0}{3}{0}{4}"
-                , Environment.NewLine
-                , $"connect {host}"
-                , group
-                , username
-                , password
-            );
-            try
-            {
-                await this._semaphoreWriteInput.WaitAsync();
-                try
-                {
-                    await this.StandardInput.WriteLineAsync(connectCommand);
                 }
                 catch (Exception ex)
                 {

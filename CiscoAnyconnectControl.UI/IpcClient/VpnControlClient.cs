@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
+using System.ServiceModel.Configuration;
 using System.Text;
 using System.Threading.Tasks;
 using CiscoAnyconnectControl.IPC.Contracts;
@@ -9,6 +13,7 @@ using CiscoAnyconnectControl.Model;
 
 namespace CiscoAnyconnectControl.UI.IpcClient
 {
+    [CallbackBehavior(ConcurrencyMode = ConcurrencyMode.Multiple)]
     class VpnControlClient : IDisposable, IVpnControlClient
     {
         private static readonly Lazy<VpnControlClient> _instance = new Lazy<VpnControlClient>(() => new VpnControlClient());
@@ -35,10 +40,11 @@ namespace CiscoAnyconnectControl.UI.IpcClient
                         {
                             this._service.UnSubscribeFromStatusModelChanges();
                             // ReSharper disable once SuspiciousTypeConversion.Global
-                            ((System.ServiceModel.Channels.IChannel)this._service).Close();
+                            ((IChannel)this._service).Abort();
                         }
                         // ReSharper disable once EmptyGeneralCatchClause
                         catch (Exception) { }
+                        this._service = null;
                     }
                 }
 
@@ -67,16 +73,42 @@ namespace CiscoAnyconnectControl.UI.IpcClient
 
         private VpnControlClient()
         {
-            var binding = new WSDualHttpBinding("serviceEndpoint");
-            var channelFactory = new DuplexChannelFactory<IVpnControlService>(new InstanceContext(this), binding);
+            ServiceModelSectionGroup group = ServiceModelSectionGroup.GetSectionGroup(ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None));
+            if (group == null) throw new Exception("Can't find pipe configuration.");
+            var channelFactory = new DuplexChannelFactory<IVpnControlService>(this, group.Client.Endpoints[0].Name);
             this._service = channelFactory.CreateChannel();
+            ((IChannel)this._service).Closed += VpnControlClient_Closed;
+            ((IChannel)this._service).Faulted += VpnControlClient_Faulted;
             this._service.SubscribeToStatusModelChanges();
             this.VpnStatusModel = this._service.GetStatusModel().ToModel();
         }
 
+        private void VpnControlClient_Faulted(object sender, EventArgs e)
+        {
+            Trace.TraceError("VpnControlClient: connection fauled.");
+        }
+
+        private void VpnControlClient_Closed(object sender, EventArgs e)
+        {
+            Trace.TraceWarning("VpnControlClient closed.");
+        }
+
         public void StatusModelPropertyChanged(string propertyName, object value)
         {
-            this.VpnStatusModel.GetType().GetProperty(propertyName)?.SetValue(this.VpnStatusModel, value);
+            Console.WriteLine($"Got status for: {propertyName}:{value}");
+            switch (propertyName)
+            {
+                case "Status":
+                    if (Enum.TryParse(value.ToString(), out VpnStatusModel.VpnStatus ev))
+                    {
+                        this.VpnStatusModel.Status = ev;
+                    }
+                    break;
+                default:
+                    this.VpnStatusModel.GetType().GetProperty(propertyName)?.SetValue(this.VpnStatusModel, value);
+                    break;
+            }
+            
         }
     }
 }

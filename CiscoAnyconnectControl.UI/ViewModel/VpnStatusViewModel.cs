@@ -22,6 +22,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
     class VpnStatusViewModel : INotifyPropertyChanged
     {
         private DispatcherTimer _timeChangedTimer;
+        private DateTime _connectLastClicked;
         public VpnStatusViewModel()
         {
             SetupCommands();
@@ -29,10 +30,11 @@ namespace CiscoAnyconnectControl.UI.ViewModel
             this.CurrStatus.PropertyChanged += CurrStatus_PropertyChanged;
             this._timeChangedTimer = new DispatcherTimer
             {
-                IsEnabled = false,
+                IsEnabled = true,
                 Interval = TimeSpan.FromSeconds(1)
             };
             this._timeChangedTimer.Tick += _timeChangedTimer_Tick;
+            this._connectLastClicked = DateTime.MinValue;
         }
 
         private void _timeChangedTimer_Tick(object sender, EventArgs e)
@@ -183,6 +185,8 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                 switch (this.CurrStatus.Status)
                 {
                     case VpnStatusModel.VpnStatus.Disconnected:
+                        enabled = DateTime.Now - this._connectLastClicked >= TimeSpan.FromSeconds(10);
+                        break;
                     case VpnStatusModel.VpnStatus.Connected:
                     case VpnStatusModel.VpnStatus.Reconnecting:
                         enabled = true;
@@ -204,9 +208,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
 
         private bool CanExecuteAction()
         {
-            return this.CurrStatus.Status == VpnStatusModel.VpnStatus.Connected ||
-                   this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnected ||
-                   this.CurrStatus.Status == VpnStatusModel.VpnStatus.Reconnecting;
+            return this.ActionButtonEnabled;
         }
 
         private void SetupCommands()
@@ -214,7 +216,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
             this.CommandConnectVpn = new RelayCommand(this.CanExecuteAction,
             async () =>
             {
-                //TODO test this command
+                this._connectLastClicked = DateTime.Now;
                 if (VpnDataFile.Instance.VpnDataModel.Group == null)
                 {
                     try
@@ -266,6 +268,11 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                 } 
                 return command;
             }
+        }
+
+        public void Closing()
+        {
+            VpnControlClient.Instance.Dispose();
         }
         
         public event PropertyChangedEventHandler PropertyChanged;

@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace CiscoAnyconnectControl.Utility
 {
@@ -15,7 +13,7 @@ namespace CiscoAnyconnectControl.Utility
         {
             get
             {
-                string codeBasePseudoUrl = System.Reflection.Assembly.GetExecutingAssembly().CodeBase;
+                string codeBasePseudoUrl = Assembly.GetExecutingAssembly().CodeBase;
                 const string filePrefix3 = @"file:///";
                 if (codeBasePseudoUrl.StartsWith(filePrefix3))
                 {
@@ -26,8 +24,48 @@ namespace CiscoAnyconnectControl.Utility
                     Console.WriteLine("fp: " + fp);
                     return fp;
                 }
-                return Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             }
+        }
+
+        /// <summary>
+        /// Checks for any known Cisco interfaces that are still running and asks the user if he wants to close them.
+        /// </summary>
+        /// <returns>true if there are no other cisco interfaces running</returns>
+        public static bool CheckForCiscoProcesses(bool close = false)
+        {
+            bool IsCiscoProcFunc(Process p)
+            {
+                switch (p.ProcessName)
+                {
+                    case "vpncli":
+                    case "vpnui":
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            List<Process> exe = Process.GetProcesses().Where(IsCiscoProcFunc).ToList();
+            if (close)
+            {
+                foreach (Process proc in exe)
+                {
+                    try
+                    {
+                        proc.CloseMainWindow();
+                        proc.WaitForExit(50);
+                        proc.Kill();
+                    }
+                    catch (Exception ex)
+                    {
+                        Util.TraceException("Error closing cisco process:", ex);
+                        return false;
+                    }
+                }
+                exe.Clear();
+            }
+            return exe.Count == 0;
         }
 
         public static void TraceException(string line1, Exception ex)

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CiscoAnyconnectControl.CiscoCliHelper
 {
-    public class CiscoCli : IDisposable
+    public sealed class CiscoCli : IDisposable
     {
         private CliProcess _ciscoCli;
         private readonly Dictionary<string, string> _states;
@@ -120,10 +120,10 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
             throw new InvalidOperationException("The vpn needs to be disonnected for the profile list to be loaded.");
         }
 
-        public void Connect(string address, string username, string password, string group)
+        public async void Connect(string address, string username, string password, string group)
         {
             if (group == null) throw new ArgumentException($"{nameof(group)} cannot be null. Please use LoadGroups in case you dont have it.", nameof(group));
-            this._ciscoCli?.SendCompleteConnect(address, username, password, group);
+            await this.SendCompleteConnect(address, username, password, group);
         }
 
         private void _ciscoCli_Exited(object sender, EventArgs e)
@@ -190,14 +190,63 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
         public async void UpdateStatus()
         {
             if (this._ciscoCli == null) return;
-            await this._ciscoCli.SendCommand(CliProcess.Command.Stats);
-            await this._ciscoCli.SendCommand(CliProcess.Command.State);
+            await this.SendToCli(CliProcess.Command.Stats);
+            await this.SendToCli(CliProcess.Command.State);
         }
 
         public async void Disconnect()
         {
             if (this._ciscoCli == null) return;
-            await this._ciscoCli.SendCommand(CliProcess.Command.Disconnect);
+            await this.SendToCli(CliProcess.Command.Disconnect);
+        }
+
+        private async Task SendToCli(CliProcess.Command command, string param = null)
+        {
+            if (this._ciscoCli == null) throw new InvalidOperationException("_ciscoCli cannot be null.");
+            bool isValidCall = false;
+            switch (command)
+            {
+                case CliProcess.Command.Connect:
+                    if (this.VpnStatusModel.Status == VpnStatusModel.VpnStatus.Disconnected)
+                    {
+                        isValidCall = true;
+                    }
+                    break;
+                case CliProcess.Command.Disconnect:
+                    if (this.VpnStatusModel.Status == VpnStatusModel.VpnStatus.Connected)
+                    {
+                        isValidCall = true;
+                    }
+                    break;
+                case CliProcess.Command.State:
+                    isValidCall = true;
+                    break;
+                case CliProcess.Command.Stats:
+                    if (this.VpnStatusModel.Status == VpnStatusModel.VpnStatus.Connected)
+                    {
+                        isValidCall = true;
+                    }
+                    break;
+                default:
+                    Trace.TraceError("wtf u doin?");
+                    break;
+            }
+            if (isValidCall)
+            {
+                await this._ciscoCli.SendCommand(command, param);
+            }
+        }
+
+        public async Task SendCompleteConnect(string host, string username, string password, string group)
+        {
+            string connectCommand = string.Format("{1}{0}{2}{0}{3}{0}{4}"
+                , Environment.NewLine
+                , host
+                , group
+                , username
+                , password
+            );
+            await SendToCli(CliProcess.Command.Connect, connectCommand);
         }
 
         public void Dispose()

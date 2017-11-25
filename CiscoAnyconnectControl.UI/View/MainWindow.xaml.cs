@@ -55,6 +55,7 @@ namespace CiscoAnyconnectControl.UI.View
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             this._settingsViewModel.CommandSaveToPersistentStorage.Execute();
+            this._vpnStatusViewModel.Closing();
         }
 
         private void CbSavePassword_Unchecked(object sender, RoutedEventArgs e)

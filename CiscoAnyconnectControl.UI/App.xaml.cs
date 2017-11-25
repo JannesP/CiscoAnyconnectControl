@@ -25,11 +25,11 @@ namespace CiscoAnyconnectControl.UI
                 App.Current.Shutdown(1);
                 return;
             }
-            if (!CheckForCiscoProcesses())
+            /*if (!CheckForCiscoProcesses())
             {
                 App.Current.Shutdown(2);
                 return;
-            }
+            }*/
 
             //TODO parse command line arguments
             //TODO display tray icon
@@ -53,49 +53,6 @@ namespace CiscoAnyconnectControl.UI
                     return false;
                 }
             } catch(Exception ex) { Utility.Util.TraceException("Exception creating mutex.", ex); }
-            return true;
-        }
-
-        /// <summary>
-        /// Checks for any known Cisco interfaces that are still running and asks the user if he wants to close them.
-        /// </summary>
-        /// <returns>true if there are no other cisco interfaces running</returns>
-        private static bool CheckForCiscoProcesses()
-        {
-            IEnumerable<Process> exe = Process.GetProcesses().Where((p) =>
-            {
-                switch (p.ProcessName)
-                {
-                    case "vpncli":
-                    case "vpnui":
-                        return true;
-                    default:
-                        return false;
-                }
-            });
-            var confirmed = false;
-            foreach (Process proc in exe)
-            {
-                if (!confirmed)
-                {
-                    MessageBoxResult dr = MessageBox.Show(
-                        "There were processes found that can interfere with this application, do you want to close them and start Cisco Anyconnect Control?",
-                        "Cisco Anyconnect Control", MessageBoxButton.YesNo, MessageBoxImage.Question,
-                        MessageBoxResult.No);
-                    if (dr == MessageBoxResult.Yes)
-                    {
-                        confirmed = true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-
-                }
-                proc.CloseMainWindow();
-                proc.WaitForExit(50);
-                proc.Kill();
-            }
             return true;
         }
 
