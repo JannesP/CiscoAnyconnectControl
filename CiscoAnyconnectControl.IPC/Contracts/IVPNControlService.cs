@@ -1,6 +1,6 @@
 ﻿using System.ServiceModel;
+using System.Threading.Tasks;
 using CiscoAnyconnectControl.IPC.DTOs;
-using CiscoAnyconnectControl.Model;
 
 namespace CiscoAnyconnectControl.IPC.Contracts
 {
@@ -11,15 +11,26 @@ namespace CiscoAnyconnectControl.IPC.Contracts
     public interface IVpnControlService
     {
         [OperationContract]
+        [ServiceKnownType(typeof(VpnStatusModelTo))]
         VpnStatusModelTo GetStatusModel();
 
         [OperationContract]
-        void SetLoginData(VpnDataModelTo vpnData);
-
-        [OperationContract]
-        void Connect();
+        [ServiceKnownType(typeof(VpnDataModelTo))]
+        void Connect(VpnDataModelTo vpnData);
 
         [OperationContract]
         void Disconnect();
+
+        [OperationContract]
+        void SubscribeToStatusModelChanges();
+
+        [OperationContract]
+        void UnSubscribeFromStatusModelChanges();
+
+        [OperationContract]
+        Task<string[]> GetGroupsForHost(string address);
+
+        [OperationContract]
+        void UpdateStatus();
     }
 }

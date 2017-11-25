@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CiscoAnyconnectControl.IPC.Contracts
 {
-    interface IVpnControlClient
+    public interface IVpnControlClient
     {
         [OperationContract]
         void StatusModelPropertyChanged(string propertyName, object value);

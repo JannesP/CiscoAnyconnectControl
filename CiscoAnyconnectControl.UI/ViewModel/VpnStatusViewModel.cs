@@ -12,20 +12,20 @@ using CiscoAnyconnectControl.Model;
 using CiscoAnyconnectControl.Utility;
 using CiscoAnyconnectControl.Model.Annotations;
 using CiscoAnyconnectControl.Model.DAL;
-using CiscoAnyconnectControl.CiscoCliHelper;
+using CiscoAnyconnectControl.IPC.Contracts;
+using CiscoAnyconnectControl.IPC.DTOs;
+using CiscoAnyconnectControl.UI.IpcClient;
 using CiscoAnyconnectControl.UI.View;
 
 namespace CiscoAnyconnectControl.UI.ViewModel
 {
-    class VpnStatusViewModel : IDisposable, INotifyPropertyChanged
+    class VpnStatusViewModel : INotifyPropertyChanged
     {
-        private CiscoCli _ciscoCli;
         private DispatcherTimer _timeChangedTimer;
         public VpnStatusViewModel()
         {
             SetupCommands();
-            SetupCli();
-            this.CurrStatus = this._ciscoCli.VpnStatusModel;
+            this.CurrStatus = VpnControlClient.Instance.VpnStatusModel;
             this.CurrStatus.PropertyChanged += CurrStatus_PropertyChanged;
             this._timeChangedTimer = new DispatcherTimer
             {
@@ -40,7 +40,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
             if (this.CurrStatus.Status == VpnStatusModel.VpnStatus.Connected ||
                 this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnecting)
             {
-                if (this.CurrStatus.TimeConnected == null) this._ciscoCli.UpdateStatus();
+                if (this.CurrStatus.TimeConnected == null) VpnControlClient.Instance.Service.UpdateStatus();
                 OnPropertyChanged(nameof(this.TimeConnected));
             }
         }
@@ -83,11 +83,6 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                     OnPropertyChanged(e.PropertyName);
                     break;
             }
-        }
-
-        private void SetupCli()
-        {
-            this._ciscoCli = new CiscoCli(SettingsFile.Instance.SettingsModel.CiscoCliPath);
         }
 
         public VpnStatusModel CurrStatus { get; set; }
@@ -224,7 +219,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                 {
                     try
                     {
-                        IEnumerable<string> groups = await this._ciscoCli.LoadGroups(VpnDataFile.Instance.VpnDataModel.Address);
+                        IEnumerable<string> groups = await VpnControlClient.Instance.Service.GetGroupsForHost(VpnDataFile.Instance.VpnDataModel.Address);
                         var selectBox = new SelectGroupModalWindow(groups);
                         bool? dr = selectBox.ShowDialog();
                         if (dr == true)
@@ -242,12 +237,12 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                     }
                 }
                 VpnDataFile.Instance.Save();
-                this._ciscoCli.Connect(VpnDataFile.Instance.VpnDataModel.Address, VpnDataFile.Instance.VpnDataModel.Username, VpnDataFile.Instance.VpnDataModel.Password, VpnDataFile.Instance.VpnDataModel.Group);
+                VpnControlClient.Instance.Service.Connect(VpnDataModelTo.FromModel(VpnDataFile.Instance.VpnDataModel));
             });
             this.CommandDisconnectVpn = new RelayCommand(this.CanExecuteAction,
             () =>
             {
-                this._ciscoCli.Disconnect();
+                VpnControlClient.Instance.Service.Disconnect();
             });
         }
 
@@ -272,17 +267,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                 return command;
             }
         }
-
-        public void Dispose()
-        {
-            this._ciscoCli?.Dispose();
-        }
-
-        public void RefreshVpnStatus()
-        {
-            this._ciscoCli.UpdateStatus();
-        }
-
+        
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
