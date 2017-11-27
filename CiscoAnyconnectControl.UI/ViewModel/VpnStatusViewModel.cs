@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using CiscoAnyconnectControl.UI.Command;
@@ -42,7 +45,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
             if (this.CurrStatus.Status == VpnStatusModel.VpnStatus.Connected ||
                 this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnecting)
             {
-                if (this.CurrStatus.TimeConnected == null) VpnControlClient.Instance.Service.UpdateStatus();
+                if (this.CurrStatus.TimeConnected == null) VpnControlClient.Instance.Service?.UpdateStatus();
                 OnPropertyChanged(nameof(this.TimeConnected));
             }
         }
@@ -221,16 +224,19 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                 {
                     try
                     {
-                        IEnumerable<string> groups = await VpnControlClient.Instance.Service.GetGroupsForHost(VpnDataFile.Instance.VpnDataModel.Address);
-                        var selectBox = new SelectGroupModalWindow(groups);
-                        bool? dr = selectBox.ShowDialog();
-                        if (dr == true)
+                        if (VpnControlClient.Instance.Service != null)
                         {
-                            VpnDataFile.Instance.VpnDataModel.Group = selectBox.SelectedGroup;
-                        }
-                        else
-                        {
-                            return;
+                            IEnumerable<string> groups = await VpnControlClient.Instance.Service.GetGroupsForHost(VpnDataFile.Instance.VpnDataModel.Address);
+                            var selectBox = new SelectGroupModalWindow(groups);
+                            bool? dr = selectBox.ShowDialog();
+                            if (dr == true)
+                            {
+                                VpnDataFile.Instance.VpnDataModel.Group = selectBox.SelectedGroup;
+                            }
+                            else
+                            {
+                                return;
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -239,12 +245,12 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                     }
                 }
                 VpnDataFile.Instance.Save();
-                VpnControlClient.Instance.Service.Connect(VpnDataModelTo.FromModel(VpnDataFile.Instance.VpnDataModel));
+                VpnControlClient.Instance.Service?.Connect(VpnDataModelTo.FromModel(VpnDataFile.Instance.VpnDataModel));
             });
             this.CommandDisconnectVpn = new RelayCommand(this.CanExecuteAction,
             () =>
             {
-                VpnControlClient.Instance.Service.Disconnect();
+                VpnControlClient.Instance.Service?.Disconnect();
             });
         }
 
@@ -270,9 +276,18 @@ namespace CiscoAnyconnectControl.UI.ViewModel
             }
         }
 
-        public void Closing()
+        public async void Closing()
         {
-            VpnControlClient.Instance.Dispose();
+            try
+            {
+                await VpnControlClient.Instance.DisconnectAsync(TimeSpan.FromMilliseconds(50), true);
+                VpnControlClient.Instance.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Util.TraceException("Error Disposing VpnControlClient:", ex);
+            }
+            
         }
         
         public event PropertyChangedEventHandler PropertyChanged;

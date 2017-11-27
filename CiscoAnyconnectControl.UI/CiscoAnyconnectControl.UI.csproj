@@ -60,12 +60,18 @@
     <Compile Include="Command\RelayCommand.cs" />
     <Compile Include="IpcClient\VpnControlClient.cs" />
     <Compile Include="ViewModel\Converters\IntConverter.cs" />
+    <Compile Include="ViewModel\IpcStatusViewModel.cs" />
     <Compile Include="ViewModel\SettingsViewModel.cs" />
     <Compile Include="ViewModel\VpnDataViewModel.cs" />
     <Compile Include="ViewModel\VpnStatusViewModel.cs" />
+    <Compile Include="View\Controls\LoadingIndicator.cs" />
     <Compile Include="View\SelectGroupModalWindow.xaml.cs">
       <DependentUpon>SelectGroupModalWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="View\Controls\Resources\LoadingArcs.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

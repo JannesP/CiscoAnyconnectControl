@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using CiscoAnyconnectControl.CiscoCliHelper;
 using CiscoAnyconnectControl.IPC.Contracts;
 using CiscoAnyconnectControl.Model;
@@ -15,13 +17,13 @@ namespace CiscoAnyConnectControl.Service
     sealed class ServiceManager
     {
         private static readonly Lazy<ServiceManager> _instance = new Lazy<ServiceManager>(() => new ServiceManager());
-
         public static ServiceManager Instance => _instance.Value;
 
         private readonly object _syncRootClients = new object();
 
-        private readonly List<IVpnControlClient> _clients = new List<IVpnControlClient>();
+        private readonly List<PingableIVpnControlClient> _clients = new List<PingableIVpnControlClient>();
         private readonly CiscoCli _ciscoCli;
+        private readonly Timer _clientsPingTimer;
 
         private ServiceManager()
         {
@@ -33,6 +35,37 @@ namespace CiscoAnyConnectControl.Service
             this._ciscoCli = new CiscoCli(SettingsFile.Instance.SettingsModel.CiscoCliPath);
             this._ciscoCli.VpnStatusModel.PropertyChanged += VpnStatusModel_PropertyChanged;
             this._ciscoCli.UpdateStatus();
+            this._clientsPingTimer = new Timer
+            {
+                Interval = 30000,
+                Enabled = false,
+                AutoReset = true
+            };
+            this._clientsPingTimer.Elapsed += _clientsPingTimer_Elapsed;
+        }
+
+        private void _clientsPingTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            var clientsToRemove = new List<IVpnControlClient>();
+            lock (this._syncRootClients)
+            {
+                foreach (PingableIVpnControlClient client in this._clients)
+                {
+                    if (!client.ReceivedPong)
+                    {
+                        clientsToRemove.Add(client.Channel);
+                        Trace.TraceInformation("Channel {0} didnt answer to ping. Removing ...", client.SessionId);
+                    }
+                    else
+                    {
+                        client.Ping();
+                    }
+                }
+            }
+            foreach (IVpnControlClient client in clientsToRemove)
+            {
+                UnSubscribeFromStatusModelChanges(client);
+            }
         }
 
         public VpnStatusModel StatusModel => this._ciscoCli.VpnStatusModel;
@@ -41,24 +74,30 @@ namespace CiscoAnyConnectControl.Service
         {
             try
             {
+                var pClient = new PingableIVpnControlClient(client);
                 lock (this._syncRootClients)
                 {
-                    this._clients.Add(client);
+                    this._clients.Add(pClient);
+                    this._clientsPingTimer.Enabled = true;
                 }
-                Trace.TraceInformation("Client added.");
+                Trace.TraceInformation("Client {0} added.", pClient.SessionId);
             }
             catch (Exception ex) { HandleException(ex); }
         }
 
         public void UnSubscribeFromStatusModelChanges(IVpnControlClient client)
         {
+            if (client == null) return;
             try
             {
+                var pClient = new PingableIVpnControlClient(client);
                 lock (this._syncRootClients)
                 {
-                    this._clients.Remove(client);
+                    this._clients.Remove(pClient);
+                    pClient.Abort();
+                    if (this._clients.Count == 0) this._clientsPingTimer.Enabled = false;
                 }
-                Trace.TraceInformation("Client removed.");
+                Trace.TraceInformation("Client {0} removed.", pClient.SessionId);
             }
             catch (Exception ex) { HandleException(ex); }
         }
@@ -79,11 +118,11 @@ namespace CiscoAnyConnectControl.Service
                     try
                     {
                         Trace.TraceInformation($"Sending PropertyChanged to client.({e.PropertyName})");
-                        c.StatusModelPropertyChanged(propName, value);
+                        c.Channel.StatusModelPropertyChanged(propName, value);
                     }
                     catch (Exception ex)
                     {
-                        UnSubscribeFromStatusModelChanges(c);
+                        UnSubscribeFromStatusModelChanges(c.Channel);
                         HandleException(ex);
                     }
                 });
@@ -132,6 +171,20 @@ namespace CiscoAnyConnectControl.Service
         private void HandleException(Exception ex)
         {
             Util.TraceException("Error in Service:", ex);
+        }
+
+        public void Pong(IVpnControlClient channel)
+        {
+            lock (this._syncRootClients)
+            {
+                foreach (PingableIVpnControlClient client in this._clients)
+                {
+                    if (client.Channel == channel)
+                    {
+                        client.ReceivePong();
+                    }
+                }
+            }
         }
     }
 }

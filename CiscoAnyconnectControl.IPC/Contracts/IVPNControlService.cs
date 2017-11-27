@@ -32,5 +32,8 @@ namespace CiscoAnyconnectControl.IPC.Contracts
 
         [OperationContract(IsOneWay = true)]
         void UpdateStatus();
+
+        [OperationContract(IsOneWay = true)]
+        void Pong();
     }
 }

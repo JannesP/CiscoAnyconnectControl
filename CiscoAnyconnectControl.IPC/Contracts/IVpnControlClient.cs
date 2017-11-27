@@ -11,5 +11,8 @@ namespace CiscoAnyconnectControl.IPC.Contracts
     {
         [OperationContract(IsOneWay = true)]
         void StatusModelPropertyChanged(string propertyName, object value);
+
+        [OperationContract(IsOneWay = true)]
+        void Ping();
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -69,6 +70,15 @@ namespace CiscoAnyconnectControl.Model
                 if (this._message == value) return;
                 this._message = value;
                 OnPropertyChanged();
+            }
+        }
+
+        public void CopyTo(VpnStatusModel target)
+        {
+            PropertyInfo[] props = this.GetType().GetProperties();
+            foreach (PropertyInfo prop in props)
+            {
+                this.GetType().GetProperty(prop.Name)?.SetValue(target, prop.GetValue(this));
             }
         }
 

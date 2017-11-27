@@ -17,8 +17,6 @@ namespace CiscoAnyconnectControl.CliServer
 {
     class Program
     {
-        /*private static string BaseAddress = "http://localhost:18375/AnyconnectControlServer";
-        private static string Address = "net.pipe://localhost/AnyconnectControlServer";*/
         static void Main(string[] args)
         {
             //redirect to standard output for now.
@@ -60,6 +58,7 @@ namespace CiscoAnyconnectControl.CliServer
                             ConsoleKeyInfo ki = Console.ReadKey();
                             if (ki.Key == ConsoleKey.Escape) run = false;
                         }
+                        host.Abort();
                     }
                 }
                 catch (Exception e)
