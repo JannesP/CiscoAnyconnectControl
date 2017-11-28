@@ -5,6 +5,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 using System.ServiceModel.Configuration;
 using System.ServiceModel.Description;
 using System.Text;
@@ -33,11 +34,34 @@ namespace CiscoAnyconnectControl.CliServer
                 }
                 ServiceElement service = group.Services.Services[0];
                 string baseAddress = service.Endpoints[0].Address.AbsoluteUri.Replace(service.Endpoints[0].Address.AbsolutePath, String.Empty);
+                Console.WriteLine("Binding name: " + service.Endpoints[0].Binding);
                 try
                 {
                     using (var host = new ServiceHost(typeof(VpnControlService), new Uri(baseAddress)))
                     {
-                        host.AddServiceEndpoint(typeof(IVpnControlService), new NetNamedPipeBinding(), service.Endpoints[0].Address.AbsolutePath);
+                        foreach (ServiceEndpointElement endpoint in service.Endpoints)
+                        {
+                            Binding binding;
+                            switch (endpoint.Binding)
+                            {
+                                case "netNamedPipeBinding":
+                                    if (!endpoint.Address.AbsoluteUri.StartsWith("net.pipe:"))
+                                    {
+                                        Trace.TraceError("The configured address {0} doesn't fit the specified binding {1}.", endpoint.Address.AbsoluteUri, endpoint.Binding);
+                                        Console.ReadLine();
+                                        Environment.Exit(1);
+                                        return;
+                                    }
+                                    binding = new NetNamedPipeBinding();
+                                    break;
+                                default:
+                                    Trace.TraceError("The configured binding {0} is not supported.", endpoint.Binding);
+                                    Console.ReadLine();
+                                    Environment.Exit(1);
+                                    return;
+                            }
+                            host.AddServiceEndpoint(typeof(IVpnControlService), binding, endpoint.Address.AbsolutePath);
+                        }
                         host.Closed += Host_Closed;
                         host.Closing += Host_Closing;
                         host.Faulted += Host_Faulted;
