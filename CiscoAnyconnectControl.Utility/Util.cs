@@ -28,6 +28,11 @@ namespace CiscoAnyconnectControl.Utility
             }
         }
 
+        public static string AssemblyName
+        {
+            get { return Assembly.GetEntryAssembly().FullName; }
+        }
+
         /// <summary>
         /// Checks for any known Cisco interfaces that are still running and asks the user if he wants to close them.
         /// </summary>

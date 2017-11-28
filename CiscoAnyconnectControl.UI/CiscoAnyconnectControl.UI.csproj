@@ -59,6 +59,9 @@
     </ApplicationDefinition>
     <Compile Include="Command\RelayCommand.cs" />
     <Compile Include="IpcClient\VpnControlClient.cs" />
+    <Compile Include="Utility\I_OSUtil.cs" />
+    <Compile Include="Utility\OSUtil.cs" />
+    <Compile Include="Utility\WindowsOSUtil.cs" />
     <Compile Include="ViewModel\Converters\IntConverter.cs" />
     <Compile Include="ViewModel\IpcStatusViewModel.cs" />
     <Compile Include="ViewModel\SettingsViewModel.cs" />
