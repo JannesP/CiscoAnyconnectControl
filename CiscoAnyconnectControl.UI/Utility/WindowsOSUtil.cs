@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security;
@@ -13,14 +14,16 @@ namespace CiscoAnyconnectControl.UI.Utility
 {
     class WindowsOSUtil : OSUtil
     {
+        private const string AutostartKeyName = "CiscoAnyconnectControl";
+
         public override bool AddUiToSystemStart()
         {
             try
             {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 if (key != null)
                 {
-                    key.SetValue("CiscoAnyconnectControl", Assembly.GetExecutingAssembly().CodeBase);
+                    key.SetValue(AutostartKeyName, $"\"{Util.FullAssemblyPath}\" -tray");
                     return true;
                 }
                 else
@@ -39,10 +42,13 @@ namespace CiscoAnyconnectControl.UI.Utility
         {
             try
             {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");
+                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 if (key != null)
                 {
-                    key.DeleteValue("CiscoAnyconnectControl");
+                    if (key.GetValue(AutostartKeyName) != null)
+                    {
+                        key.DeleteValue(AutostartKeyName);
+                    }
                     return true;
                 }
                 else
@@ -56,6 +62,15 @@ namespace CiscoAnyconnectControl.UI.Utility
             }
             return false;
         }
-        
+
+        public override void AddTrayIcon()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void RemoveTrayIcon()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

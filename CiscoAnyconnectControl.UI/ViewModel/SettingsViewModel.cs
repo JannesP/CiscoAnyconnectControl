@@ -12,6 +12,7 @@ using CiscoAnyconnectControl.UI.Command;
 using CiscoAnyconnectControl.Model;
 using CiscoAnyconnectControl.Model.Annotations;
 using CiscoAnyconnectControl.Model.DAL;
+using CiscoAnyconnectControl.UI.Utility;
 using CiscoAnyconnectControl.Utility;
 using Microsoft.Win32;
 
@@ -42,6 +43,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
             {
                 SettingsFile.Instance.Save();
             });
+            OnPropertyChanged(nameof(StartGuiOnLogon));
             SettingsFile.Instance.SettingsModel.PropertyChanged += SettingsModel_PropertyChanged;
         }
 
@@ -101,6 +103,19 @@ namespace CiscoAnyconnectControl.UI.ViewModel
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
+            switch (propertyName)
+            {
+                case nameof(StartGuiOnLogon):
+                    if (StartGuiOnLogon)
+                    {
+                        OSUtil.Instance.AddUiToSystemStart();
+                    }
+                    else
+                    {
+                        OSUtil.Instance.RemoveUiFromSystemStart();
+                    }
+                    break;
+            }
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }

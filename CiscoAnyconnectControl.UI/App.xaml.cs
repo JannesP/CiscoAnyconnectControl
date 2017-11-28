@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CiscoAnyconnectControl.UI.View;
+using CiscoAnyconnectControl.Utility;
 
 namespace CiscoAnyconnectControl.UI
 {
@@ -32,6 +33,16 @@ namespace CiscoAnyconnectControl.UI
             }*/
 
             //TODO parse command line arguments
+            foreach (string arg in e.Args)
+            {
+                Trace.TraceInformation("Parsing arg: {0} ...", arg);
+                switch (arg)
+                {
+                    case "-tray":
+
+                        break;
+                }
+            }
             //TODO display tray icon
 
             var window = new MainWindow();
@@ -52,7 +63,7 @@ namespace CiscoAnyconnectControl.UI
                     MessageBox.Show("Another instance is already running. Showing that isnt implemented though.");
                     return false;
                 }
-            } catch(Exception ex) { Utility.Util.TraceException("Exception creating mutex.", ex); }
+            } catch(Exception ex) { Util.TraceException("Exception creating mutex.", ex); }
             return true;
         }
 
@@ -69,7 +80,7 @@ namespace CiscoAnyconnectControl.UI
                     proc.Kill();
                 }
             }
-            catch (Exception ex) { Utility.Util.TraceException("Unhandled exception in unhandled exception handler.", ex); }
+            catch (Exception ex) { Util.TraceException("Unhandled exception in unhandled exception handler.", ex); }
         }
 
         private void Window_Closed(object sender, EventArgs e)

@@ -11,26 +11,29 @@ namespace CiscoAnyconnectControl.Utility
     {
         public static string AssemblyDirectory
         {
+            get { return Path.GetDirectoryName(FullAssemblyPath); }
+        }
+
+        public static string FullAssemblyPath
+        {
             get
             {
-                string codeBasePseudoUrl = Assembly.GetExecutingAssembly().CodeBase;
+                string codeBasePseudoUrl = Assembly.GetEntryAssembly().CodeBase;
                 const string filePrefix3 = @"file:///";
                 if (codeBasePseudoUrl.StartsWith(filePrefix3))
                 {
                     string sPath = codeBasePseudoUrl.Substring(filePrefix3.Length);
                     string bsPath = sPath.Replace('/', '\\');
                     Console.WriteLine("bsPath: " + bsPath);
-                    string fp = Path.GetDirectoryName(bsPath);
-                    Console.WriteLine("fp: " + fp);
-                    return fp;
+                    return bsPath;
                 }
-                return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                return Assembly.GetExecutingAssembly().Location;
             }
         }
 
         public static string AssemblyName
         {
-            get { return Assembly.GetEntryAssembly().FullName; }
+            get { return Path.GetFileName(FullAssemblyPath); }
         }
 
         /// <summary>

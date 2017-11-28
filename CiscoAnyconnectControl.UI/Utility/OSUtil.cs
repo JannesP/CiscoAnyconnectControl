@@ -9,7 +9,7 @@ namespace CiscoAnyconnectControl.UI.Utility
 {
     abstract class OSUtil : I_OSUtil
     {
-        private Lazy<OSUtil> _instance = new Lazy<OSUtil>(() =>
+        private static Lazy<OSUtil> _instance = new Lazy<OSUtil>(() =>
         {
             Console.WriteLine(Environment.OSVersion);
             switch (Environment.OSVersion)
@@ -19,9 +19,18 @@ namespace CiscoAnyconnectControl.UI.Utility
             return new WindowsOSUtil();
         });
 
-        public OSUtil Instance => _instance.Value;
+        public static OSUtil Instance => _instance.Value;
 
         public abstract bool AddUiToSystemStart();
         public abstract bool RemoveUiFromSystemStart();
+        public abstract void AddTrayIcon();
+        public abstract void RemoveTrayIcon();
+
+        public event EventHandler TrayIconDoubleClick;
+
+        protected virtual void OnTrayIconDoubleClick(object sender, EventArgs e)
+        {
+            TrayIconDoubleClick?.Invoke(sender, e);
+        }
     }
 }

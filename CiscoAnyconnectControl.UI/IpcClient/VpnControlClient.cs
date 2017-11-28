@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using CiscoAnyconnectControl.IPC.Contracts;
 using CiscoAnyconnectControl.Model;
 using CiscoAnyconnectControl.Model.Annotations;
+using CiscoAnyconnectControl.Utility;
 
 namespace CiscoAnyconnectControl.UI.IpcClient
 {
@@ -129,7 +130,7 @@ namespace CiscoAnyconnectControl.UI.IpcClient
             }
             catch (Exception ex)
             {
-                Utility.Util.TraceException($"Cannot create pipe for endpoint {channelFactory.Endpoint.Address}:", ex);
+                Util.TraceException($"Cannot create pipe for endpoint {channelFactory.Endpoint.Address}:", ex);
                 return false;
             }
             try
@@ -138,7 +139,7 @@ namespace CiscoAnyconnectControl.UI.IpcClient
             }
             catch (Exception ex)
             {
-                Utility.Util.TraceException("Error connecting to IPC server:", ex);
+                Util.TraceException("Error connecting to IPC server:", ex);
                 return false;
             }
             Trace.TraceInformation("Connected to IPC server.");

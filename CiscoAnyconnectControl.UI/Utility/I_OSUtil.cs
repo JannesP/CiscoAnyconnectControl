@@ -10,5 +10,9 @@ namespace CiscoAnyconnectControl.UI.Utility
     {
         bool AddUiToSystemStart();
         bool RemoveUiFromSystemStart();
+        void AddTrayIcon();
+        void RemoveTrayIcon();
+        
+        event EventHandler TrayIconDoubleClick;
     }
 }
