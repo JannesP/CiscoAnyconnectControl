@@ -94,6 +94,11 @@ namespace CiscoAnyconnectControl.UI.ViewModel
             get => SettingsFile.Instance.SettingsModel.NotifyAfterHours;
             set => SettingsFile.Instance.SettingsModel.NotifyAfterHours = value;
         }
+        public bool CloseToTray
+        {
+            get => SettingsFile.Instance.SettingsModel.CloseToTray;
+            set => SettingsFile.Instance.SettingsModel.CloseToTray = value;
+        }
 
         public RelayCommand CommandSelectCiscoCli { get; private set; }
 

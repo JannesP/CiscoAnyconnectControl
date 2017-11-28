@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using CiscoAnyconnectControl.Utility;
 using Microsoft.Win32;
 
@@ -15,6 +17,9 @@ namespace CiscoAnyconnectControl.UI.Utility
     class WindowsOSUtil : OSUtil
     {
         private const string AutostartKeyName = "CiscoAnyconnectControl";
+        private NotifyIcon _trayIcon;
+
+        public WindowsOSUtil() { }
 
         public override bool AddUiToSystemStart()
         {
@@ -63,14 +68,44 @@ namespace CiscoAnyconnectControl.UI.Utility
             return false;
         }
 
-        public override void AddTrayIcon()
+        public override void ShowTrayIcon()
         {
-            throw new NotImplementedException();
+            if (_trayIcon == null)
+            {
+                _trayIcon = CreateTrayIcon();
+            }
+            _trayIcon.Visible = true;
         }
 
-        public override void RemoveTrayIcon()
+        private void _trayIcon_DoubleClick(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            OnTrayIconDoubleClick(sender, e);
+        }
+
+        public override void HideTrayIcon()
+        {
+            if (_trayIcon != null) _trayIcon.Visible = false;
+        }
+
+        private NotifyIcon CreateTrayIcon()
+        {
+            _trayIcon = new NotifyIcon();
+            _trayIcon.DoubleClick += _trayIcon_DoubleClick;
+            try
+            {
+                _trayIcon.Icon = new Icon(Assembly.GetExecutingAssembly()
+                                              .GetManifestResourceStream(
+                                                  "CiscoAnyconnectControl.UI.Resources.trayIcon.ico") ??
+                                          throw new InvalidOperationException());
+            }
+            catch (Exception ex)
+            {
+                Util.TraceException("Error loading trayIcon:", ex);
+            }
+            var menu = new ContextMenu();
+            menu.MenuItems.Add(new MenuItem("Exit", OnTrayExitClick));
+            _trayIcon.ContextMenu = menu;
+            return _trayIcon;
         }
     }
 }

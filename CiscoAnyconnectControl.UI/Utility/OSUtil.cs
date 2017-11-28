@@ -23,14 +23,21 @@ namespace CiscoAnyconnectControl.UI.Utility
 
         public abstract bool AddUiToSystemStart();
         public abstract bool RemoveUiFromSystemStart();
-        public abstract void AddTrayIcon();
-        public abstract void RemoveTrayIcon();
+        public abstract void ShowTrayIcon();
+        public abstract void HideTrayIcon();
 
         public event EventHandler TrayIconDoubleClick;
 
         protected virtual void OnTrayIconDoubleClick(object sender, EventArgs e)
         {
             TrayIconDoubleClick?.Invoke(sender, e);
+        }
+
+        public event EventHandler TrayExitClick;
+
+        protected virtual void OnTrayExitClick(object sender, EventArgs e)
+        {
+            TrayExitClick?.Invoke(sender, e);
         }
     }
 }

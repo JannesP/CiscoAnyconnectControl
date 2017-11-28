@@ -15,25 +15,26 @@ namespace CiscoAnyconnectControl.Model
         private bool _startGuiOnLogon = false;
         private bool _notifyAfterX = true;
         private int _notifyAfterHours = 9;
+        private bool _closeToTray;
 
         public string CiscoCliPath
         {
-            get => this._ciscoCliPath;
+            get => _ciscoCliPath;
             set
             {
-                if (this._ciscoCliPath == value) return;
-                this._ciscoCliPath = value;
+                if (_ciscoCliPath == value) return;
+                _ciscoCliPath = value;
                 OnPropertyChanged();
             }
         }
 
         public bool SavePassword
         {
-            get => this._savePassword;
+            get => _savePassword;
             set
             {
-                if (this._savePassword == value) return;
-                this._savePassword = value;
+                if (_savePassword == value) return;
+                _savePassword = value;
                 OnPropertyChanged();
             }
         }
@@ -43,52 +44,63 @@ namespace CiscoAnyconnectControl.Model
             get => this._connectOnSystemStartup;
             set
             {
-                if (this._connectOnSystemStartup == value) return;
-                this._connectOnSystemStartup = value;
+                if (_connectOnSystemStartup == value) return;
+                _connectOnSystemStartup = value;
                 OnPropertyChanged();
             }
         }
 
         public bool ReconnectOnConnectionLoss
         {
-            get => this._reconnectOnConnectionLoss;
+            get => _reconnectOnConnectionLoss;
             set
             {
-                if (this._reconnectOnConnectionLoss == value) return;
-                this._reconnectOnConnectionLoss = value;
+                if (_reconnectOnConnectionLoss == value) return;
+                _reconnectOnConnectionLoss = value;
                 OnPropertyChanged();
             }
         }
 
         public bool StartGuiOnLogon
         {
-            get => this._startGuiOnLogon;
+            get => _startGuiOnLogon;
             set
             {
-                if (this._startGuiOnLogon == value) return;
-                this._startGuiOnLogon = value;
+                if (_startGuiOnLogon == value) return;
+                _startGuiOnLogon = value;
                 OnPropertyChanged();
             }
         }
 
         public bool NotifyAfterX
         {
-            get => this._notifyAfterX;
+            get => _notifyAfterX;
             set
             {
-                if (this._notifyAfterX == value) return;
-                this._notifyAfterX = value;
+                if (_notifyAfterX == value) return;
+                _notifyAfterX = value;
                 OnPropertyChanged();
             }
         }
 
         public int NotifyAfterHours
         {
-            get => this._notifyAfterHours;
+            get => _notifyAfterHours;
             set
             {
-                if (this._notifyAfterHours == value) return;
-                this._notifyAfterHours = value;
+                if (_notifyAfterHours == value) return;
+                _notifyAfterHours = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool CloseToTray
+        {
+            get => _closeToTray;
+            set
+            {
+                if (_closeToTray == value) return;
+                _closeToTray = value;
                 OnPropertyChanged();
             }
         }

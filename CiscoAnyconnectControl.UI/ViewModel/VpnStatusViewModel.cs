@@ -275,20 +275,6 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                 return command;
             }
         }
-
-        public async void Closing()
-        {
-            try
-            {
-                await VpnControlClient.Instance.DisconnectAsync(TimeSpan.FromMilliseconds(50), true);
-                VpnControlClient.Instance.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Util.TraceException("Error Disposing VpnControlClient:", ex);
-            }
-            
-        }
         
         public event PropertyChangedEventHandler PropertyChanged;
 

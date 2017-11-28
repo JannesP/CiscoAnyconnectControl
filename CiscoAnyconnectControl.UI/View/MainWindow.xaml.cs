@@ -25,6 +25,7 @@ namespace CiscoAnyconnectControl.UI.View
         private VpnDataViewModel _vpnDataViewModel = null;
         private VpnStatusViewModel _vpnStatusViewModel = null;
         private SettingsViewModel _settingsViewModel = null;
+        private IpcStatusViewModel _ipcStatusViewModel = null;
         private PasswordBox _pwdBox = null;
 
         public MainWindow()
@@ -34,28 +35,30 @@ namespace CiscoAnyconnectControl.UI.View
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            this._vpnDataViewModel = (VpnDataViewModel) FindResource("VpnData");
-            this._vpnStatusViewModel = (VpnStatusViewModel) FindResource("VpnStatus");
-            this._settingsViewModel = (SettingsViewModel) FindResource("Settings");
-            this._pwdBox = (PasswordBox)FindName("PwdVpnPassword");
-            if (this._pwdBox != null) this._pwdBox.Password = this._vpnDataViewModel.Password;
+            _vpnDataViewModel = (VpnDataViewModel) FindResource("VpnData");
+            _vpnStatusViewModel = (VpnStatusViewModel) FindResource("VpnStatus");
+            _settingsViewModel = (SettingsViewModel) FindResource("Settings");
+            _ipcStatusViewModel = (IpcStatusViewModel) FindResource("IpcStatus");
+            _pwdBox = (PasswordBox)FindName("PwdVpnPassword");
+            if (_pwdBox != null) _pwdBox.Password = _vpnDataViewModel.Password;
+            _ipcStatusViewModel.Connect();
         }
 
         private void PwdVpnPassword_PasswordChanged(object sender, RoutedEventArgs e)
         {
-            this._vpnDataViewModel.SecurePassword = ((PasswordBox)sender).SecurePassword;
+            _vpnDataViewModel.SecurePassword = ((PasswordBox)sender).SecurePassword;
         }
 
         private void BtnAction_Click(object sender, RoutedEventArgs e)
         {
-            this._vpnDataViewModel.SaveToModel.Execute();
-            this._vpnStatusViewModel.CurrentActionCommand.Execute();
+            _vpnDataViewModel.SaveToModel.Execute();
+            _vpnStatusViewModel.CurrentActionCommand.Execute();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            this._settingsViewModel.CommandSaveToPersistentStorage.Execute();
-            this._vpnStatusViewModel.Closing();
+            _settingsViewModel.CommandSaveToPersistentStorage.Execute();
+            _ipcStatusViewModel.Disconnect();
         }
 
         private void CbSavePassword_Unchecked(object sender, RoutedEventArgs e)

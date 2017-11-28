@@ -27,6 +27,8 @@ namespace CiscoAnyconnectControl.UI.ViewModel
         public bool IsInterfaceDisabled => !this.ShowLoadingIndicator;
         public Visibility LoadingIndicatorVisibility => this.ShowLoadingIndicator ? Visibility.Visible : Visibility.Collapsed;
 
+        private volatile bool _disconnected = true;
+
         private void VpnControlClient_Instance_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -54,10 +56,24 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                     {
                         Task.Run(() =>
                         {
-                            Trace.TraceInformation("Reconnecting to IPC in 5s ...");
-                            Thread.Sleep(5000);
-                            VpnControlClient.Instance.ConnectAsync().ContinueWith(VpnControlClient_ConnectContinuation);
+                            if (!_disconnected)
+                            {
+                                Trace.TraceInformation("Reconnecting to IPC in 5s ...");
+                                Thread.Sleep(5000);
+                            }
+                            if (!_disconnected)
+                            {
+                                VpnControlClient.Instance.ConnectAsync()
+                                    .ContinueWith(VpnControlClient_ConnectContinuation);
+                            }
                         });
+                    }
+                    else
+                    {
+                        if (_disconnected)
+                        {
+                            Disconnect();
+                        }
                     }
                     break;
                 case TaskStatus.Faulted:
@@ -68,6 +84,24 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                     Trace.TraceError("Unexpected Task State after connect attempt ({0}).", t.Status);
                     break;
             }
+        }
+
+        public void Disconnect()
+        {
+            _disconnected = true;
+            VpnControlClient.Instance.DisconnectAsync(TimeSpan.FromSeconds(1), true).ContinueWith((t) =>
+            {
+                if (t.IsFaulted) Util.TraceException("Uncaught error disconnecting VpnControlClient:", t.Exception?.InnerException);
+            });
+        }
+
+        public void Connect()
+        {
+            _disconnected = false;
+            VpnControlClient.Instance.ConnectAsync().ContinueWith((t) =>
+            {
+                if (t.IsFaulted) Util.TraceException("Uncaught error connecting to VpnControlClient:", t.Exception?.InnerException);
+            });
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

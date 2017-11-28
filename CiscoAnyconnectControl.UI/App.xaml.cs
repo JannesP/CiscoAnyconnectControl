@@ -8,6 +8,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using CiscoAnyconnectControl.Model;
+using CiscoAnyconnectControl.Model.DAL;
+using CiscoAnyconnectControl.UI.Utility;
 using CiscoAnyconnectControl.UI.View;
 using CiscoAnyconnectControl.Utility;
 
@@ -26,11 +29,8 @@ namespace CiscoAnyconnectControl.UI
                 App.Current.Shutdown(1);
                 return;
             }
-            /*if (!CheckForCiscoProcesses())
-            {
-                App.Current.Shutdown(2);
-                return;
-            }*/
+
+            bool trayStart = false;
 
             //TODO parse command line arguments
             foreach (string arg in e.Args)
@@ -39,18 +39,46 @@ namespace CiscoAnyconnectControl.UI
                 switch (arg)
                 {
                     case "-tray":
-
+                        OSUtil.Instance.ShowTrayIcon();
+                        trayStart = true;
                         break;
                 }
             }
-            //TODO display tray icon
-
-            var window = new MainWindow();
-            window.Show();
-            window.Closed += Window_Closed;
-            App.Current.MainWindow = window;
+            
+            if (!trayStart)
+            {
+                CreateAndOrShowMainWindow();
+            }
+            App.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             App.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
+            OSUtil.Instance.TrayIconDoubleClick += App_TrayIconDoubleClick;
+            OSUtil.Instance.TrayExitClick += App_TrayExitClick;
             base.OnStartup(e);
+        }
+
+        private void App_TrayExitClick(object sender, EventArgs e)
+        {
+            App.Current.Shutdown(0);
+        }
+
+        private void CreateAndOrShowMainWindow()
+        {
+            if (App.Current.MainWindow == null)
+            {
+                var window = new MainWindow();
+                window.Show();
+                window.Closed += Window_Closed;
+                App.Current.MainWindow = window;
+            }
+            else
+            {
+                App.Current.MainWindow.Activate();
+            }
+        }
+
+        private void App_TrayIconDoubleClick(object sender, EventArgs e)
+        {
+            CreateAndOrShowMainWindow();
         }
 
         private bool CheckIfFirstInstance()
@@ -71,28 +99,43 @@ namespace CiscoAnyconnectControl.UI
         {
             try
             {
-                this._mutex?.Dispose();
-                this._mutex = null;
-                IEnumerable<Process> exe = Process.GetProcesses().Where((p) => p.ProcessName == "vpncli");
+                OSUtil.Instance.HideTrayIcon();
+                /*IEnumerable<Process> exe = Process.GetProcesses().Where((p) => p.ProcessName == "vpncli");
                 foreach (Process proc in exe)
                 {
                     //TODO maybe change to work with service if needed
                     proc.Kill();
-                }
+                }*/
             }
-            catch (Exception ex) { Util.TraceException("Unhandled exception in unhandled exception handler.", ex); }
+            catch (Exception ex)
+            {
+                Util.TraceException("Unhandled exception in unhandled exception handler.", ex);
+            }
+            finally
+            {
+                this._mutex?.Dispose();
+                this._mutex = null;
+            }
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            App.Current.Shutdown(0);
+            if (SettingsFile.Instance.SettingsModel.CloseToTray)
+            {
+                OSUtil.Instance.ShowTrayIcon();
+                App.Current.MainWindow = null;
+            }
+            else
+            {
+                App.Current.Shutdown(0);
+            }
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
+            OSUtil.Instance.HideTrayIcon();
             this._mutex?.Dispose();
             this._mutex = null;
-            //TODO hide tray icon
             base.OnExit(e);
         }
     }
