@@ -23,8 +23,8 @@ namespace CiscoAnyconnectControl.Model.DAL
         private SettingsFile(string path)
         {
             Console.WriteLine($"Initializing SettingsFile with {path}.");
-            this._path = path;
-            this.SettingsModel = Load(path);
+            _path = path;
+            SettingsModel = Load(path);
         }
 
         private SettingsModel Load(string path = "")
@@ -32,7 +32,7 @@ namespace CiscoAnyconnectControl.Model.DAL
             bool fileExists = File.Exists(path);
             if (!fileExists)
             {
-                this.SettingsModel = new SettingsModel();
+                SettingsModel = new SettingsModel();
             }
             else
             {
@@ -41,7 +41,7 @@ namespace CiscoAnyconnectControl.Model.DAL
                     var xmlSerializer = new XmlSerializer(typeof(SettingsModel));
                     try
                     {
-                        this.SettingsModel = (SettingsModel) xmlSerializer.Deserialize(stream);
+                        SettingsModel = (SettingsModel) xmlSerializer.Deserialize(stream);
                     }
                     catch (Exception ex)
                     {
@@ -61,7 +61,7 @@ namespace CiscoAnyconnectControl.Model.DAL
                             default:
                                 stream.Dispose();
                                 File.Delete(path);
-                                this.SettingsModel = new SettingsModel();
+                                SettingsModel = new SettingsModel();
                                 break;
                         }
                     }
@@ -72,12 +72,18 @@ namespace CiscoAnyconnectControl.Model.DAL
 
         public void Save()
         {
-            var xmlSerializer = new XmlSerializer(this.SettingsModel.GetType());
-            using (FileStream fs = File.OpenWrite(this._path))
+            try
             {
-                xmlSerializer.Serialize(fs, this.SettingsModel);
+                var xmlSerializer = new XmlSerializer(this.SettingsModel.GetType());
+                using (FileStream fs = File.Create(_path))
+                {
+                    xmlSerializer.Serialize(fs, SettingsModel);
+                }
             }
-            
+            catch (Exception ex)
+            {
+                Util.TraceException("Error serializing settings to xml:", ex);
+            }
         }
     }
 }
