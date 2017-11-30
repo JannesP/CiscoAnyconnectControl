@@ -23,9 +23,7 @@ namespace CiscoAnyconnectControl.Utility
                 if (codeBasePseudoUrl.StartsWith(filePrefix3))
                 {
                     string sPath = codeBasePseudoUrl.Substring(filePrefix3.Length);
-                    string bsPath = sPath.Replace('/', '\\');
-                    Console.WriteLine("bsPath: " + bsPath);
-                    return bsPath;
+                    return sPath.Replace('/', '\\');
                 }
                 return Assembly.GetExecutingAssembly().Location;
             }

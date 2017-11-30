@@ -20,7 +20,7 @@ namespace CiscoAnyconnectControl.UI.IpcClient
     [CallbackBehavior(ConcurrencyMode = ConcurrencyMode.Reentrant)]
     class VpnControlClient : IDisposable, IVpnControlClient, INotifyPropertyChanged
     {
-        private static readonly Lazy<VpnControlClient> _instance = new Lazy<VpnControlClient>(() => new VpnControlClient());
+        private static Lazy<VpnControlClient> _instance = new Lazy<VpnControlClient>(() => new VpnControlClient());
 
         public static VpnControlClient Instance => _instance.Value;
 
@@ -33,6 +33,16 @@ namespace CiscoAnyconnectControl.UI.IpcClient
         private bool _connecting = false;
 
         public VpnStatusModel VpnStatusModel { get; } = new VpnStatusModel();
+
+        private enum State
+        {
+            Connecting,
+            Connected,
+            Disconnecting,
+            Disconnected
+        }
+
+        private volatile State _state = State.Disconnected;
 
         [CanBeNull]
         public IVpnControlService Service
@@ -118,10 +128,12 @@ namespace CiscoAnyconnectControl.UI.IpcClient
 
         private async Task<bool> CreateNewChannelAsync()
         {
+            if (_state == State.Connected) return true;
             this.IsConnected = false;
 
             await DisconnectAsync(TimeSpan.FromMilliseconds(100), true);
             this._manuallyDisconnected = false;
+            _state = State.Connecting;
             Trace.TraceInformation("Connecting to IPC server ...");
             var channelFactory = new DuplexChannelFactory<IVpnControlService>(this, this._serviceModelSectionGroup.Client.Endpoints[0].Name);
             try
@@ -131,6 +143,7 @@ namespace CiscoAnyconnectControl.UI.IpcClient
             catch (Exception ex)
             {
                 Util.TraceException($"Cannot create pipe for endpoint {channelFactory.Endpoint.Address}:", ex);
+                _state = State.Disconnected;
                 return false;
             }
             try
@@ -140,8 +153,10 @@ namespace CiscoAnyconnectControl.UI.IpcClient
             catch (Exception ex)
             {
                 Util.TraceException("Error connecting to IPC server:", ex);
+                _state = State.Disconnected;
                 return false;
             }
+            _state = State.Connected;
             Trace.TraceInformation("Connected to IPC server.");
             lock (this._syncRoot)
             {
@@ -161,18 +176,21 @@ namespace CiscoAnyconnectControl.UI.IpcClient
         /// <returns>True if the connection was successful or False otherwise.</returns>
         public async Task<bool> ConnectAsync()
         {
-            bool r = await CreateNewChannelAsync();
             this._manuallyDisconnected = false;
-            return r;
+            return await CreateNewChannelAsync();
         }
 
         public async Task<bool> DisconnectAsync(TimeSpan timeout, bool forceAfterTimeout = true)
         {
+            if (_state == State.Disconnected) return true;
+            _manuallyDisconnected = true;
+            _state = State.Disconnecting;
             return await Task.Run(() =>
             {
                 var closed = false;
                 try
                 {
+                    
                     IChannel ch = this.Service as IChannel;
                     if (ch != null)
                     {
@@ -180,10 +198,10 @@ namespace CiscoAnyconnectControl.UI.IpcClient
                             ch.State != CommunicationState.Closing)
                         {
                             ch?.Close(timeout);
+                            _state = State.Disconnected;
                         }
                         if (this.Service != null) Trace.TraceInformation("Closed old IPC connection.");
                     }
-                    this._manuallyDisconnected = true;
                     closed = true;
                 }
                 catch (TimeoutException)
@@ -192,7 +210,7 @@ namespace CiscoAnyconnectControl.UI.IpcClient
                     {
                         (this.Service as IChannel).Abort();
                         if (this.Service != null) Trace.TraceWarning("Aborted old IPC connection.");
-                        this._manuallyDisconnected = true;
+                        _state = State.Disconnected;
                         closed = true;
                     }
                 }
@@ -202,10 +220,11 @@ namespace CiscoAnyconnectControl.UI.IpcClient
 
         private void VpnControlClient_Faulted(object sender, EventArgs e)
         {
+            _state = State.Disconnected;
             this.IsConnected = false;
             this.Service = null;
             Trace.TraceError("VpnControlClient: connection fauled.");
-            if (!this._manuallyDisconnected)
+            if (!_manuallyDisconnected)
             {
                 OnConnectionLost();
             }
@@ -213,6 +232,7 @@ namespace CiscoAnyconnectControl.UI.IpcClient
 
         private void VpnControlClient_Closed(object sender, EventArgs e)
         {
+            _state = State.Disconnected;
             this.IsConnected = false;
             this.Service = null;
             Trace.TraceWarning("VpnControlClient closed.");
@@ -224,6 +244,7 @@ namespace CiscoAnyconnectControl.UI.IpcClient
 
         private void VpnControlClient_Closing(object sender, EventArgs e)
         {
+            _state = State.Disconnecting;
             this.IsConnected = false;
             Trace.TraceWarning("VpnControlClient closing ...");
         }
@@ -268,6 +289,13 @@ namespace CiscoAnyconnectControl.UI.IpcClient
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void Reset()
+        {
+            Trace.TraceError("VpnControlClient got reset.");
+            _instance = new Lazy<VpnControlClient>(() => new VpnControlClient());
+            this.Dispose();
         }
     }
 }

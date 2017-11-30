@@ -58,12 +58,16 @@ namespace CiscoAnyconnectControl.UI.View
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             _settingsViewModel.CommandSaveToPersistentStorage.Execute();
-            _ipcStatusViewModel.Disconnect();
         }
 
         private void CbSavePassword_Unchecked(object sender, RoutedEventArgs e)
         {
             this._pwdBox.Password = "";
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            _ipcStatusViewModel.Disconnect();
         }
     }
 }

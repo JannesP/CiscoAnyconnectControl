@@ -7,7 +7,7 @@
         xmlns:vm="clr-namespace:CiscoAnyconnectControl.UI.ViewModel"
         mc:Ignorable="d"
         Title="Cisco Anyconnect Control" Height="255" Width="400" Loaded="Window_Loaded"
-        MinHeight="275" MinWidth="400" Closing="Window_Closing" >
+        MinHeight="275" MinWidth="400" Closing="Window_Closing" Closed="Window_Closed" >
     <Window.Resources>
 
         <ResourceDictionary>
