@@ -235,6 +235,10 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
             {
                 await this._ciscoCli.SendCommand(command, param);
             }
+            else
+            {
+                Trace.TraceWarning($"SendToCli called in wrong state: {VpnStatusModel.Status}, cmd: {command}");
+            }
         }
 
         public async Task SendCompleteConnect(string host, string username, string password, int groupId)

@@ -110,6 +110,9 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                     case VpnStatusModel.VpnStatus.Reconnecting:
                         color = "yellow";
                         break;
+                    case VpnStatusModel.VpnStatus.Unknown:
+                        color = "purple";
+                        break;
                     default:
                         color = "orange";
                         break;
@@ -139,6 +142,9 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                         break;
                     case VpnStatusModel.VpnStatus.Reconnecting:
                         text = "Reconnecting ...";
+                        break;
+                    case VpnStatusModel.VpnStatus.Unknown:
+                        text = "Not connected to backend ...";
                         break;
                     default:
                         text = $"Error ... {this.CurrStatus.Status} is not defined.";
@@ -170,6 +176,9 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                         break;
                     case VpnStatusModel.VpnStatus.Disconnecting:
                         text = "Disconnecting ...";
+                        break;
+                    case VpnStatusModel.VpnStatus.Unknown:
+                        text = "Not connected to backend ...";
                         break;
                     default:
                         text = "Error ...";

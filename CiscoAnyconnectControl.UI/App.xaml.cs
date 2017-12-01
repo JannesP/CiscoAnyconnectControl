@@ -6,11 +6,14 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using CiscoAnyconnectControl.IPC.DTOs;
 using CiscoAnyconnectControl.Model;
 using CiscoAnyconnectControl.Model.DAL;
+using CiscoAnyconnectControl.UI.IpcClient;
 using CiscoAnyconnectControl.UI.Utility;
 using CiscoAnyconnectControl.UI.View;
 using CiscoAnyconnectControl.Utility;
@@ -24,19 +27,20 @@ namespace CiscoAnyconnectControl.UI
     {
         private Mutex _mutex;
 
+        private enum ErrorCode
+        {
+            FailedIpc,
+            NotFirstInstance
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
-            if (!CheckIfFirstInstance())
-            {
-                App.Current.Shutdown(1);
-                return;
-            }
             //TODO: install service if not installed.
             //TODO: check for cisco autostart
 
             bool trayStart = false;
 
-            //TODO parse command line arguments
+            //parse command line arguments
             foreach (string arg in e.Args)
             {
                 Trace.TraceInformation("Parsing arg: {0} ...", arg);
@@ -46,9 +50,39 @@ namespace CiscoAnyconnectControl.UI
                         OSUtil.Instance.ShowTrayIcon();
                         trayStart = true;
                         break;
+                    case "-autoconnect":
+                        /*try
+                        {
+                            bool connected = IpcClient.VpnControlClient.Instance.ConnectAsync()
+                                .Wait(TimeSpan.FromSeconds(30));
+                            if (connected)
+                            {
+                                VpnControlClient.Instance.Service?.Connect(
+                                    VpnDataModelTo.FromModel(VpnDataFile.Instance.VpnDataModel));
+                                VpnControlClient.Instance.DisconnectAsync(TimeSpan.FromSeconds(5), true).Wait();
+                                App.Current.Shutdown();
+                                return;
+                            }
+                            else
+                            {
+                                App.Current.Shutdown((int)ErrorCode.FailedIpc);
+                                return;
+                            }
+                        }
+                        catch (AggregateException ex)
+                        {
+                            Util.TraceException("Error connecting VpnControlClient:", ex.InnerExceptions[0]);
+                            App.Current.Shutdown((int)ErrorCode.FailedIpc);
+                            return;
+                        }*/
+                        break;
                 }
             }
-            
+            if (!CheckIfFirstInstance())
+            {
+                App.Current.Shutdown((int)ErrorCode.NotFirstInstance);
+                return;
+            }
             if (!trayStart)
             {
                 CreateAndOrShowMainWindow();

@@ -12,14 +12,14 @@ namespace CiscoAnyconnectControl.Model
 {
     public class VpnStatusModel : INotifyPropertyChanged
     {
-        private VpnStatus _status = VpnStatus.Disconnected;
+        private VpnStatus _status = VpnStatus.Unknown;
         private string _message = null;
         private DateTime _timeConnectedLastValueSetAt = DateTime.MinValue;
         private TimeSpan? _timeConnectedLastValue = null;
 
         public enum VpnStatus
         {
-            Disconnected, Connecting, Connected, Disconnecting, Reconnecting
+            Disconnected, Connecting, Connected, Disconnecting, Reconnecting, Unknown
         }
 
         public VpnStatus Status

@@ -218,9 +218,17 @@ namespace CiscoAnyconnectControl.UI.IpcClient
             });
         }
 
+        private void ResetModel()
+        {
+            VpnStatusModel.Status = VpnStatusModel.VpnStatus.Unknown;
+            VpnStatusModel.TimeConnected = null;
+            VpnStatusModel.Message = "";
+        }
+
         private void VpnControlClient_Faulted(object sender, EventArgs e)
         {
             _state = State.Disconnected;
+            ResetModel();
             this.IsConnected = false;
             this.Service = null;
             Trace.TraceError("VpnControlClient: connection fauled.");
@@ -233,6 +241,7 @@ namespace CiscoAnyconnectControl.UI.IpcClient
         private void VpnControlClient_Closed(object sender, EventArgs e)
         {
             _state = State.Disconnected;
+            ResetModel();
             this.IsConnected = false;
             this.Service = null;
             Trace.TraceWarning("VpnControlClient closed.");

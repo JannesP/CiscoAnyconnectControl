@@ -16,6 +16,8 @@ namespace CiscoAnyconnectControl.UI.ViewModel
 {
     class IpcStatusViewModel : INotifyPropertyChanged
     {
+        private static int ReconnectSleepSeconds => 2;
+
         public IpcStatusViewModel()
         {
             _tokenSourceConnect = new CancellationTokenSource();
@@ -26,8 +28,9 @@ namespace CiscoAnyconnectControl.UI.ViewModel
         public bool ShowLoadingIndicator => !VpnControlClient.Instance.IsConnected;
         public bool IsInterfaceDisabled => !this.ShowLoadingIndicator;
         public Visibility LoadingIndicatorVisibility => this.ShowLoadingIndicator ? Visibility.Visible : Visibility.Collapsed;
-        private CancellationTokenSource _tokenSourceConnect; 
 
+        private CancellationTokenSource _tokenSourceConnect;
+        
         private enum State
         {
             Connecting,
@@ -52,6 +55,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
 
         private void Instance_ConnectionLost(object sender, EventArgs args)
         {
+            _state = State.Connecting;
             VpnControlClient.Instance.ConnectAsync().ContinueWith(VpnControlClient_ConnectContinuation);
         }
 
@@ -70,7 +74,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                                 if (_state == State.Connecting)
                                 {
                                     Trace.TraceInformation("Reconnecting to IPC in 5s ...");
-                                    await Task.Delay(TimeSpan.FromSeconds(5), _tokenSourceConnect.Token);
+                                    await Task.Delay(TimeSpan.FromSeconds(ReconnectSleepSeconds), _tokenSourceConnect.Token);
                                     Task<bool> newTask = VpnControlClient.Instance.ConnectAsync();
                                     VpnControlClient_ConnectContinuation(newTask);
                                 }

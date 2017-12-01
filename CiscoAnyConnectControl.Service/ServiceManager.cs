@@ -24,6 +24,7 @@ namespace CiscoAnyConnectControl.Service
         private readonly List<PingableIVpnControlClient> _clients = new List<PingableIVpnControlClient>();
         private readonly CiscoCli _ciscoCli;
         private readonly Timer _clientsPingTimer;
+        private readonly Timer _cliRefreshTimer;
 
         private ServiceManager()
         {
@@ -42,6 +43,39 @@ namespace CiscoAnyConnectControl.Service
                 AutoReset = true
             };
             this._clientsPingTimer.Elapsed += _clientsPingTimer_Elapsed;
+            this._clientsPingTimer = new Timer
+            {
+                Interval = 60000,
+                Enabled = true,
+                AutoReset = true
+            };
+            this._cliRefreshTimer.Elapsed += _cliRefreshTimer_Elapsed;
+            
+
+            //handle settings like autostart
+            if (SettingsFile.Instance.SettingsModel.ConnectOnSystemStartup &&
+                SettingsFile.Instance.SettingsModel.SavePassword)
+            {
+                Task.Run(async () =>
+                {
+                    VpnDataModel vpnData = VpnDataFile.Instance.VpnDataModel;
+                    if (vpnData.Group == null)
+                    {
+                        Trace.TraceError("Error autostarting vpn. The group was not set.");
+                    }
+                    else
+                    {
+                        //give the cisco cli a little bit of time to start
+                        await Task.Delay(TimeSpan.FromSeconds(1));
+                        Connect(vpnData);
+                    }
+                });
+            }
+        }
+
+        private void _cliRefreshTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            UpdateStatus();
         }
 
         private void _clientsPingTimer_Elapsed(object sender, ElapsedEventArgs e)
