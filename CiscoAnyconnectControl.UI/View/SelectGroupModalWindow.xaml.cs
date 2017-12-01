@@ -26,30 +26,32 @@ namespace CiscoAnyconnectControl.UI.View
         {
             InitCommands();
             InitializeComponent();
-            this._cbGroups = (ComboBox) FindName("CbGroups");
-            if (this._cbGroups == null) throw new Exception("Error initializing window, CbGroups not found.");
-            this._cbGroups.ItemsSource = options;
+            _cbGroups = (ComboBox) FindName("CbGroups");
+            if (_cbGroups == null) throw new Exception("Error initializing window, CbGroups not found.");
+            _cbGroups.ItemsSource = options;
         }
 
         public SelectGroupModalWindow() : this(new List<string> {"ExampleItem"}) { }
 
         public string SelectedGroup { get; private set; }
+        public int SelectedGroupIndex { get; private set; }
 
         private void InitCommands()
         {
             //TODO replace CanExecute with something useful
-            this.OkCommand = new RelayCommand(() => true, () =>
+            OkCommand = new RelayCommand(() => true, () =>
             {
-                this.DialogResult = true;
-                this.SelectedGroup = (string) this._cbGroups.SelectedItem;
-                this.Close();
+                DialogResult = true;
+                SelectedGroup = (string) _cbGroups.SelectedItem;
+                SelectedGroupIndex = _cbGroups.SelectedIndex;
+                Close();
             });
 
-            this.CancelCommand = new RelayCommand(() => true, () =>
+            CancelCommand = new RelayCommand(() => true, () =>
             {
-                this.DialogResult = false;
-                this.SelectedGroup = null;
-                this.Close();
+                DialogResult = false;
+                SelectedGroup = null;
+                Close();
             });
         }
 

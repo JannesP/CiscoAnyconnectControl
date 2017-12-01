@@ -232,6 +232,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                             if (dr == true)
                             {
                                 VpnDataFile.Instance.VpnDataModel.Group = selectBox.SelectedGroup;
+                                VpnDataFile.Instance.VpnDataModel.GroupId = selectBox.SelectedGroupIndex;
                             }
                             else
                             {

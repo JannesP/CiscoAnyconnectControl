@@ -19,6 +19,7 @@ namespace CiscoAnyconnectControl.Model
         private string _address = "vpn.example.com";
         private string _password = "";
         private string _group = null;
+        private int _groupId = 0;
 
         public string Address
         {
@@ -60,6 +61,17 @@ namespace CiscoAnyconnectControl.Model
             {
                 if (this._group == value) return;
                 this._group = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int GroupId
+        {
+            get => _groupId;
+            set
+            {
+                if (_groupId == value) return;
+                _groupId = value;
                 OnPropertyChanged();
             }
         }

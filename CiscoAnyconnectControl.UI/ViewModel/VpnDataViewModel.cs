@@ -22,70 +22,83 @@ namespace CiscoAnyconnectControl.UI.ViewModel
         private string _username = "username";
         private string _password = "";
         private string _group = null;
+        private int _groupId = 0;
 
         public VpnDataViewModel()
         {
-            this.Model = VpnDataFile.Instance.VpnDataModel;
-            this.Address = this.Model.Address;
-            this.Username = this.Model.Username;
-            this.Password = this.Model.Password;
-            this.Group = this.Model.Group;
-            this.Model.PropertyChanged += Model_PropertyChanged;
+            Model = VpnDataFile.Instance.VpnDataModel;
+            Address = Model.Address;
+            Username = Model.Username;
+            Password = Model.Password;
+            Group = Model.Group;
+            GroupId = Model.GroupId;
+            Model.PropertyChanged += Model_PropertyChanged;
             
             SetupCommands();
         }
 
         private void Model_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            this.GetType().GetProperty(e.PropertyName)?.SetValue(this, sender.GetType().GetProperty(e.PropertyName)?.GetValue(sender));
+            GetType().GetProperty(e.PropertyName)?.SetValue(this, sender.GetType().GetProperty(e.PropertyName)?.GetValue(sender));
         }
 
         private VpnDataModel Model { get; set; }
 
         public string Address
         {
-            get => this._address;
+            get => _address;
             set
             {
-                if (this._address == value) return;
-                this._address = value;
+                if (_address == value) return;
+                _address = value;
                 OnPropertyChanged();
             }
         }
 
         public string Username
         {
-            get => this._username;
+            get => _username;
             set
             {
-                if (this._username == value) return;
-                this._username = value;
+                if (_username == value) return;
+                _username = value;
                 OnPropertyChanged();
             }
         }
 
         public string Password
         {
-            get => this._password;
+            get => _password;
             set
             {
-                if (this._password == value) return;
-                this._password = value;
+                if (_password == value) return;
+                _password = value;
                 OnPropertyChanged();
             }
         }
 
         public string Group
         {
-            get => this._group;
+            get => $"({_groupId}) {_group}";
             set
             {
-                if (this._group == value) return;
-                this._group = value;
+                if (_group == value) return;
+                _group = value;
                 OnPropertyChanged();
             }
         }
 
+        public int GroupId
+        {
+            get => _groupId;
+            set
+            {
+                if (_groupId == value) return;
+                _groupId = value;
+                OnPropertyChanged(nameof(Group));
+                OnPropertyChanged();
+            }
+        }
         public SecureString SecurePassword
         {
             set
@@ -106,7 +119,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                         }
                     }
                 }
-                this.Password = pwd;
+                Password = pwd;
             }
         }
         
@@ -118,16 +131,18 @@ namespace CiscoAnyconnectControl.UI.ViewModel
 
         private void SetupCommands()
         {
-            this.SaveToModel = new RelayCommand(this.DataChanged, () => {
-                this.Model.Address = this.Address;
+            SaveToModel = new RelayCommand(DataChanged, () => {
+                Model.Address = Address;
                 if (SettingsFile.Instance.SettingsModel.SavePassword)
-                    this.Model.Password = this.Password;
-                this.Model.Username = this.Username;
-                this.Model.Group = this.Group;
+                    Model.Password = _password;
+                Model.Username = _username;
+                Model.Group = _group;
+                Model.GroupId = _groupId;
             });
-            this.RemoveGroup = new RelayCommand(() => this.IsRemoveProfileButtonEnabled, () => {
-                this.Group = null;
-                this.Model.Group = null;
+            RemoveGroup = new RelayCommand(() => IsRemoveProfileButtonEnabled, () => {
+                Group = null;
+                Model.GroupId = 0;
+                Model.Group = null;
             });
         }
 

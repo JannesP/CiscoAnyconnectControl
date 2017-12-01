@@ -135,7 +135,7 @@ namespace CiscoAnyConnectControl.Service
         {
             try
             {
-                this._ciscoCli.Connect(vpnDataModel.Address, vpnDataModel.Username, vpnDataModel.Password, vpnDataModel.Group);
+                this._ciscoCli.Connect(vpnDataModel.Address, vpnDataModel.Username, vpnDataModel.Password, vpnDataModel.GroupId);
             }
             catch (Exception ex) { HandleException(ex); }
         }

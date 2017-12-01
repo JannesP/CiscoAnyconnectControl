@@ -19,7 +19,8 @@ namespace CiscoAnyconnectControl.IPC.DTOs
                 Address = mdl.Address,
                 Username = mdl.Username,
                 Password = mdl.Password,
-                Group = mdl.Group
+                Group = mdl.Group,
+                GroupId = mdl.GroupId
             };
         }
 
@@ -30,7 +31,8 @@ namespace CiscoAnyconnectControl.IPC.DTOs
                 Address = this.Address,
                 Username = this.Username,
                 Password = this.Password,
-                Group = this.Group
+                Group = this.Group,
+                GroupId = this.GroupId
             };
         }
 
@@ -45,5 +47,8 @@ namespace CiscoAnyconnectControl.IPC.DTOs
 
         [DataMember]
         public string Group { get; set; }
+
+        [DataMember]
+        public int GroupId { get; set; }
     }
 }

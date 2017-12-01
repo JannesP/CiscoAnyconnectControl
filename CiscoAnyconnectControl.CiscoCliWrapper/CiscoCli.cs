@@ -120,10 +120,10 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
             throw new InvalidOperationException("The vpn needs to be disonnected for the profile list to be loaded.");
         }
 
-        public async void Connect(string address, string username, string password, string group)
+        public async void Connect(string address, string username, string password, int groupId)
         {
-            if (group == null) throw new ArgumentException($"{nameof(group)} cannot be null. Please use LoadGroups in case you dont have it.", nameof(group));
-            await this.SendCompleteConnect(address, username, password, group);
+            if (groupId < 0) throw new ArgumentException($"{nameof(groupId)} has to be > 0. Please use LoadGroups in case you dont have it.", nameof(groupId));
+            await this.SendCompleteConnect(address, username, password, groupId);
         }
 
         private void _ciscoCli_Exited(object sender, EventArgs e)
@@ -237,12 +237,12 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
             }
         }
 
-        public async Task SendCompleteConnect(string host, string username, string password, string group)
+        public async Task SendCompleteConnect(string host, string username, string password, int groupId)
         {
             string connectCommand = string.Format("{1}{0}{2}{0}{3}{0}{4}"
                 , Environment.NewLine
                 , host
-                , group
+                , groupId
                 , username
                 , password
             );

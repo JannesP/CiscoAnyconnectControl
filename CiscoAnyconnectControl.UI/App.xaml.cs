@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace CiscoAnyconnectControl.UI
     public partial class App : Application
     {
         private Mutex _mutex;
+
         protected override void OnStartup(StartupEventArgs e)
         {
             if (!CheckIfFirstInstance())
@@ -29,6 +31,8 @@ namespace CiscoAnyconnectControl.UI
                 App.Current.Shutdown(1);
                 return;
             }
+            //TODO: install service if not installed.
+            //TODO: check for cisco autostart
 
             bool trayStart = false;
 
