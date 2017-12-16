@@ -43,15 +43,16 @@ namespace CiscoAnyConnectControl.Service
                 AutoReset = true
             };
             this._clientsPingTimer.Elapsed += _clientsPingTimer_Elapsed;
-            this._clientsPingTimer = new Timer
+            this._cliRefreshTimer = new Timer
             {
-                Interval = 60000,
+                Interval = 20000,
                 Enabled = true,
                 AutoReset = true
             };
             this._cliRefreshTimer.Elapsed += _cliRefreshTimer_Elapsed;
             
-
+            /*
+             * disabled for test purposes -> implemented in the client
             //handle settings like autostart
             if (SettingsFile.Instance.SettingsModel.ConnectOnSystemStartup &&
                 SettingsFile.Instance.SettingsModel.SavePassword)
@@ -70,7 +71,7 @@ namespace CiscoAnyConnectControl.Service
                         Connect(vpnData);
                     }
                 });
-            }
+            }*/
         }
 
         private void _cliRefreshTimer_Elapsed(object sender, ElapsedEventArgs e)

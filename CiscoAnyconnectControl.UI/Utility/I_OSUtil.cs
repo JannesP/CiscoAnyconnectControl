@@ -12,6 +12,9 @@ namespace CiscoAnyconnectControl.UI.Utility
         bool RemoveUiFromSystemStart();
         void ShowTrayIcon();
         void HideTrayIcon();
+        void DisableCiscoAutostart();
+        void RestoreCiscoAutostart();
+        bool IsCiscoAutostartEnabled();
 
         event EventHandler TrayExitClick;
         event EventHandler TrayIconDoubleClick;

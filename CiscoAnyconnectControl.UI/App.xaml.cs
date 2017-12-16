@@ -29,16 +29,17 @@ namespace CiscoAnyconnectControl.UI
 
         private enum ErrorCode
         {
-            FailedIpc,
-            NotFirstInstance
+            FailedIpc = -1,
+            NotFirstInstance = -2,
+            CiscoAutostartDetected = -3
         }
 
         protected override void OnStartup(StartupEventArgs e)
         {
             //TODO: install service if not installed.
-            //TODO: check for cisco autostart
 
             bool trayStart = false;
+            bool isFirstInstance = CheckIfFirstInstance();
 
             //parse command line arguments
             foreach (string arg in e.Args)
@@ -47,7 +48,10 @@ namespace CiscoAnyconnectControl.UI
                 switch (arg)
                 {
                     case "-tray":
-                        OSUtil.Instance.ShowTrayIcon();
+                        if (isFirstInstance)
+                        {
+                            OSUtil.Instance.ShowTrayIcon();
+                        }
                         trayStart = true;
                         break;
                     case "-autoconnect":
@@ -78,10 +82,42 @@ namespace CiscoAnyconnectControl.UI
                         break;
                 }
             }
-            if (!CheckIfFirstInstance())
+            if (!isFirstInstance)
             {
+                MessageBox.Show("Another instance is already running. Showing that isnt implemented though.");
                 App.Current.Shutdown((int)ErrorCode.NotFirstInstance);
                 return;
+            }
+            if (OSUtil.Instance.IsCiscoAutostartEnabled())
+            {
+                MessageBoxResult mbr = MessageBox.Show(
+                    "Cisco UI Autostart found. This doesn't work together with this program.\nDo you want to disable it? This program will exit if you don't.",
+                    "CiscoAnyconnectControl", MessageBoxButton.YesNo);
+                if (mbr == MessageBoxResult.Yes) OSUtil.Instance.DisableCiscoAutostart();
+                else
+                {
+                    Trace.TraceInformation("User denied disabling of cisco autostart. Exiting ...");
+                    App.Current.Shutdown((int)ErrorCode.CiscoAutostartDetected);
+                }
+
+            }
+
+            //check settings that need to be done before the ui starts
+            if (SettingsFile.Instance.SettingsModel.ConnectOnSystemStartup)
+            {
+                VpnControlClient.Instance.ConnectAsync().ContinueWith((t) =>
+                {
+                    if (!t.IsFaulted)
+                    {
+                        VpnControlClient.Instance.Service?.Connect(
+                            VpnDataModelTo.FromModel(VpnDataFile.Instance.VpnDataModel));
+                    }
+                    else
+                    {
+                        Util.TraceException("Error connecting to ipc:", t.Exception?.InnerException);
+                    }
+                    
+                });
             }
             if (!trayStart)
             {
@@ -126,7 +162,6 @@ namespace CiscoAnyconnectControl.UI
             {
                 if (!this._mutex.WaitOne(0, false))
                 {
-                    MessageBox.Show("Another instance is already running. Showing that isnt implemented though.");
                     return false;
                 }
             } catch(Exception ex) { Util.TraceException("Exception creating mutex.", ex); }

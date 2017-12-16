@@ -11,11 +11,7 @@ namespace CiscoAnyconnectControl.UI.Utility
     {
         private static Lazy<OSUtil> _instance = new Lazy<OSUtil>(() =>
         {
-            Console.WriteLine(Environment.OSVersion);
-            switch (Environment.OSVersion)
-            {
-                
-            }
+            Trace.TraceInformation("Environment.OSVersion: {0}", Environment.OSVersion);
             return new WindowsOSUtil();
         });
 
@@ -25,6 +21,9 @@ namespace CiscoAnyconnectControl.UI.Utility
         public abstract bool RemoveUiFromSystemStart();
         public abstract void ShowTrayIcon();
         public abstract void HideTrayIcon();
+        public abstract void DisableCiscoAutostart();
+        public abstract void RestoreCiscoAutostart();
+        public abstract bool IsCiscoAutostartEnabled();
 
         public event EventHandler TrayIconDoubleClick;
 

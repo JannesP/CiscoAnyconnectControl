@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -17,6 +18,10 @@ namespace CiscoAnyconnectControl.UI.Utility
     class WindowsOSUtil : OSUtil
     {
         private const string AutostartKeyName = "CiscoAnyconnectControl";
+        private string CiscoAutostartKeyName => "Cisco AnyConnect Secure Mobility Agent for Windows";
+        private string RegistryAutostartKey => @"Software\Microsoft\Windows\CurrentVersion\Run";
+        private string RegistryDisabledAutostartKey => "AutorunsDisabled";
+
         private NotifyIcon _trayIcon;
 
         public WindowsOSUtil() { }
@@ -25,15 +30,17 @@ namespace CiscoAnyconnectControl.UI.Utility
         {
             try
             {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
-                if (key != null)
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryAutostartKey, true))
                 {
-                    key.SetValue(AutostartKeyName, $"\"{Util.FullAssemblyPath}\" -tray");
-                    return true;
-                }
-                else
-                {
-                    Trace.TraceError("Autostart key couldn't be opened!");
+                    if (key != null)
+                    {
+                        key.SetValue(AutostartKeyName, $"\"{Util.FullAssemblyPath}\" -tray");
+                        return true;
+                    }
+                    else
+                    {
+                        Trace.TraceError("Autostart key couldn't be opened!");
+                    }
                 }
             }
             catch (SecurityException ex)
@@ -47,18 +54,20 @@ namespace CiscoAnyconnectControl.UI.Utility
         {
             try
             {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
-                if (key != null)
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryAutostartKey, true))
                 {
-                    if (key.GetValue(AutostartKeyName) != null)
+                    if (key != null)
                     {
-                        key.DeleteValue(AutostartKeyName);
+                        if (key.GetValue(AutostartKeyName) != null)
+                        {
+                            key.DeleteValue(AutostartKeyName);
+                        }
+                        return true;
                     }
-                    return true;
-                }
-                else
-                {
-                    Trace.TraceError("Autostart key couldn't be opened!");
+                    else
+                    {
+                        Trace.TraceError("Autostart key couldn't be opened!");
+                    }
                 }
             }
             catch (SecurityException ex)
@@ -85,6 +94,98 @@ namespace CiscoAnyconnectControl.UI.Utility
         public override void HideTrayIcon()
         {
             if (_trayIcon != null) _trayIcon.Visible = false;
+        }
+
+        public override void DisableCiscoAutostart()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(RegistryAutostartKey, true))
+                {
+                    if (key != null)
+                    {
+                        object ciscoAutostartValue = key.GetValue(CiscoAutostartKeyName);
+                        if (ciscoAutostartValue != null)
+                        {
+                            using (RegistryKey backupKey = key.CreateSubKey(RegistryDisabledAutostartKey, true))
+                            {
+                                backupKey.SetValue(CiscoAutostartKeyName, ciscoAutostartValue);
+                            }
+                            key.DeleteValue(CiscoAutostartKeyName);
+                        }
+                    }
+                    else
+                    {
+                        Trace.TraceError("Autostart key couldn't be opened!");
+                    }
+                }
+            }
+            catch (SecurityException ex)
+            {
+                Util.TraceException("SecuriyException in DisableCiscoAutostart:", ex);
+            }
+        }
+
+        public override void RestoreCiscoAutostart()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(RegistryAutostartKey, true))
+                {
+                    if (key != null)
+                    {
+                        using (RegistryKey backupKey = key.OpenSubKey(RegistryDisabledAutostartKey, true))
+                        {
+                            if (backupKey != null)
+                            {
+                                object backupVal = backupKey.GetValue(CiscoAutostartKeyName);
+                                if (backupVal != null)
+                                {
+                                    key.SetValue(CiscoAutostartKeyName, backupVal);
+                                    backupKey.DeleteValue(CiscoAutostartKeyName);
+                                }
+                                else Trace.TraceError("Cannot find backup key. Nothing to restore from.");
+                            }
+                            else
+                            {
+                                Trace.TraceError("Backup key couldn't be opened!");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Trace.TraceError("Autostart key couldn't be opened!");
+                    }
+                }
+            }
+            catch (SecurityException ex)
+            {
+                Util.TraceException("SecuriyException in DisableCiscoAutostart:", ex);
+            }
+        }
+
+        public override bool IsCiscoAutostartEnabled()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(RegistryAutostartKey, true))
+                {
+                    if (key != null)
+                    {
+                        return key.GetValue(CiscoAutostartKeyName) != null;
+                    }
+                    else
+                    {
+                        Trace.TraceError("Autostart key couldn't be opened!");
+                        return false;
+                    }
+                }
+            }
+            catch (SecurityException ex)
+            {
+                Util.TraceException("SecuriyException in DisableCiscoAutostart:", ex);
+            }
+            throw new Exception("Windows:IsCiscoAutostartEnabled ran to end without reaching a return.");
         }
 
         private NotifyIcon CreateTrayIcon()
