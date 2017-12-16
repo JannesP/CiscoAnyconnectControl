@@ -34,7 +34,7 @@ namespace CiscoAnyconnectControl.UI.Utility
                 {
                     if (key != null)
                     {
-                        key.SetValue(AutostartKeyName, $"\"{Util.FullAssemblyPath}\" -tray");
+                        key.SetValue(AutostartKeyName, $"\"{Util.FullAssemblyPath}\" -tray -unsafeRunAsUser");
                         return true;
                     }
                     else
@@ -186,6 +186,22 @@ namespace CiscoAnyconnectControl.UI.Utility
                 Util.TraceException("SecuriyException in DisableCiscoAutostart:", ex);
             }
             throw new Exception("Windows:IsCiscoAutostartEnabled ran to end without reaching a return.");
+        }
+
+        public override bool IsElevatedProcess()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software", true))
+                {
+                    return true;
+                }
+            }
+            catch (SecurityException ex)
+            {
+                Util.TraceException("SecuriyException in DisableCiscoAutostart:", ex);
+                return false;
+            }
         }
 
         private NotifyIcon CreateTrayIcon()

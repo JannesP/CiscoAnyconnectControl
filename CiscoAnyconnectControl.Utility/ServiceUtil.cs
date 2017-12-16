@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -186,6 +187,27 @@ namespace CiscoAnyconnectControl.Utility
             Critical = 0x00000003
         }
 
+        //https://msdn.microsoft.com/en-us/library/windows/desktop/ms681988.aspx
+        public enum ServiceConfig
+        {
+            ServiceConfidDelayedAutoStartInfo = 3,
+            Description = 1,
+            FailiureActions = 2,
+            FailiureActionFlag = 4,
+            PreferredNode = 9,
+            PreshutdownInfo = 7,
+            RequiredPrivilegesInfo = 6,
+            ServiceSidInfo = 5,
+            TriggerInfo = 8,
+            LaunchProtected = 12
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private class SERVICE_DESCRIPTION
+        {
+            public string lpDescription;
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         private class SERVICE_STATUS
         {
@@ -214,6 +236,9 @@ namespace CiscoAnyconnectControl.Utility
         private static extern int ControlService(IntPtr hService, ServiceControl dwControl, SERVICE_STATUS lpServiceStatus);
         [DllImport("advapi32.dll", EntryPoint = "StartServiceA")]
         private static extern int StartService(IntPtr hService, int dwNumServiceArgs, int lpServiceArgVectors);
+        //TODO: get to work
+        [DllImport("advapi32.dll")]
+        private static extern int ChangeServiceConfig2(IntPtr hService, ServiceConfig dwInfoLevel, object lpInfo);
 
         /// <summary>
         /// Takes a service name and tries to stop and then uninstall the windows serviceError
@@ -278,8 +303,10 @@ namespace CiscoAnyconnectControl.Utility
         /// <param name="ServiceName">The service name that this service will have</param>
         /// <param name="DisplayName">The display name that this service will have</param>
         /// <param name="FileName">The path to the executable of the service</param>
+        /// <param name="Dependencies">A null-char seperated list of service names</param>
+        /// <param name="Description">The description that this service will have</param>
         public static void InstallAndStart(string ServiceName, string DisplayName,
-        string FileName)
+        string FileName, string Dependencies = null, string Description = null)
         {
             IntPtr scman = OpenSCManager(ServiceManagerRights.Connect |
             ServiceManagerRights.CreateService);
@@ -292,11 +319,16 @@ namespace CiscoAnyconnectControl.Utility
                     service = CreateService(scman, ServiceName, DisplayName,
                     ServiceRights.QueryStatus | ServiceRights.Start, SERVICE_WIN32_OWN_PROCESS,
                     ServiceBootFlag.AutoStart, ServiceError.Normal, FileName, null, IntPtr.Zero,
-                    null, null, null);
+                    Dependencies, null, null);
                 }
                 if (service == IntPtr.Zero)
                 {
                     throw new ApplicationException("Failed to install service.");
+                }
+                else
+                {
+                    var sd = new SERVICE_DESCRIPTION {lpDescription = Description};
+                    ChangeServiceConfig2(service, ServiceConfig.Description, sd);
                 }
                 try
                 {

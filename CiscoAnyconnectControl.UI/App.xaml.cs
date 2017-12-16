@@ -31,7 +31,8 @@ namespace CiscoAnyconnectControl.UI
         {
             FailedIpc = -1,
             NotFirstInstance = -2,
-            CiscoAutostartDetected = -3
+            CiscoAutostartDetected = -3,
+            NotElevated = -4
         }
 
         protected override void OnStartup(StartupEventArgs e)
@@ -40,6 +41,8 @@ namespace CiscoAnyconnectControl.UI
 
             bool trayStart = false;
             bool isFirstInstance = CheckIfFirstInstance();
+            bool isElevated = OSUtil.Instance.IsElevatedProcess();
+            bool nonElevatedAllowed = false;
 
             //parse command line arguments
             foreach (string arg in e.Args)
@@ -54,31 +57,11 @@ namespace CiscoAnyconnectControl.UI
                         }
                         trayStart = true;
                         break;
-                    case "-autoconnect":
-                        /*try
-                        {
-                            bool connected = IpcClient.VpnControlClient.Instance.ConnectAsync()
-                                .Wait(TimeSpan.FromSeconds(30));
-                            if (connected)
-                            {
-                                VpnControlClient.Instance.Service?.Connect(
-                                    VpnDataModelTo.FromModel(VpnDataFile.Instance.VpnDataModel));
-                                VpnControlClient.Instance.DisconnectAsync(TimeSpan.FromSeconds(5), true).Wait();
-                                App.Current.Shutdown();
-                                return;
-                            }
-                            else
-                            {
-                                App.Current.Shutdown((int)ErrorCode.FailedIpc);
-                                return;
-                            }
-                        }
-                        catch (AggregateException ex)
-                        {
-                            Util.TraceException("Error connecting VpnControlClient:", ex.InnerExceptions[0]);
-                            App.Current.Shutdown((int)ErrorCode.FailedIpc);
-                            return;
-                        }*/
+                    case "-unsafeRunAsUser":
+                        nonElevatedAllowed = true;
+                        break;
+                    default:
+                        Trace.TraceInformation("Arg: \"{0}\" is not implemented and got ignored.", arg);
                         break;
                 }
             }
@@ -88,7 +71,20 @@ namespace CiscoAnyconnectControl.UI
                 App.Current.Shutdown((int)ErrorCode.NotFirstInstance);
                 return;
             }
-            if (OSUtil.Instance.IsCiscoAutostartEnabled())
+            if (!isElevated)
+            {
+                if (nonElevatedAllowed)
+                {
+                    Trace.TraceWarning("Starting without elevated permissions.");
+                }
+                else
+                {
+                    MessageBox.Show("This program 'needs' to be run as administrator.\nContact me if you really need to run it without.");
+                    App.Current.Shutdown((int)ErrorCode.NotElevated);
+                    return;
+                }
+            }
+            if (isElevated && OSUtil.Instance.IsCiscoAutostartEnabled())
             {
                 MessageBoxResult mbr = MessageBox.Show(
                     "Cisco UI Autostart found. This doesn't work together with this program.\nDo you want to disable it? This program will exit if you don't.",
@@ -98,6 +94,7 @@ namespace CiscoAnyconnectControl.UI
                 {
                     Trace.TraceInformation("User denied disabling of cisco autostart. Exiting ...");
                     App.Current.Shutdown((int)ErrorCode.CiscoAutostartDetected);
+                    return;
                 }
 
             }

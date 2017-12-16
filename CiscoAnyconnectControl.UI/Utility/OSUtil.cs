@@ -24,6 +24,7 @@ namespace CiscoAnyconnectControl.UI.Utility
         public abstract void DisableCiscoAutostart();
         public abstract void RestoreCiscoAutostart();
         public abstract bool IsCiscoAutostartEnabled();
+        public abstract bool IsElevatedProcess();
 
         public event EventHandler TrayIconDoubleClick;
 

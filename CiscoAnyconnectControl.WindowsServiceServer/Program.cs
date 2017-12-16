@@ -26,7 +26,7 @@ namespace CiscoAnyconnectControl.WindowsServiceServer
                     case "-installIfNotInstalled":
                         if (!ServiceUtil.IsInstalled(service.ServiceName))
                         {
-                            ServiceUtil.InstallAndStart(service.ServiceName, service.DisplayName, Util.FullAssemblyPath);
+                            ServiceUtil.InstallAndStart(service.ServiceName, service.DisplayName, Util.FullAssemblyPath, "vpnagent\0\0", "This is a test description.");
                         }
                         return;
                 }
