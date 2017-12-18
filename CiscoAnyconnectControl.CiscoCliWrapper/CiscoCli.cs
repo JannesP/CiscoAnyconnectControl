@@ -123,6 +123,7 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
         public async void Connect(string address, string username, string password, int groupId)
         {
             if (groupId < 0) throw new ArgumentException($"{nameof(groupId)} has to be > 0. Please use LoadGroups in case you dont have it.", nameof(groupId));
+            CreateNewCli(_path);
             await this.SendCompleteConnect(address, username, password, groupId);
         }
 
@@ -197,6 +198,7 @@ namespace CiscoAnyconnectControl.CiscoCliHelper
         public async void Disconnect()
         {
             if (this._ciscoCli == null) return;
+            CreateNewCli(_path);
             await this.SendToCli(CliProcess.Command.Disconnect);
         }
 
