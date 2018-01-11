@@ -49,6 +49,7 @@
     <Compile Include="DTOs\VpnDataModelTo.cs" />
     <Compile Include="DTOs\VpnStatusModelTo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SharedSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CiscoAnyconnectControl.Model\CiscoAnyconnectControl.Model.csproj">

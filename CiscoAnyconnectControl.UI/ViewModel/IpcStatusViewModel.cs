@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CiscoAnyconnectControl.Model.Annotations;
+using CiscoAnyconnectControl.UI.Command;
 using CiscoAnyconnectControl.UI.IpcClient;
 using CiscoAnyconnectControl.Utility;
 
@@ -141,6 +142,8 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                 });
             }
         }
+
+        public RelayCommand ConnectCommand => new RelayCommand(() => true, Connect);
 
         public event PropertyChangedEventHandler PropertyChanged;
 

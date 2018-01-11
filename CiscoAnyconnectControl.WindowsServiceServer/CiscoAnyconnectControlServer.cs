@@ -31,7 +31,7 @@ namespace CiscoAnyconnectControl.WindowsServiceServer
         {
             InitializeComponent();
             _semaphoreStopServer = new SemaphoreSlim(1, 1);
-            this.ServiceName = "CiscoAnyconnectControlServer";
+            this.ServiceName = IPC.SharedSettings.ServiceName;
             this.CanPauseAndContinue = false;
             this.CanHandlePowerEvent = true;
             this.CanStop = true;

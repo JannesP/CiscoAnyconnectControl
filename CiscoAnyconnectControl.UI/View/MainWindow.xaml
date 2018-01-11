@@ -23,146 +23,158 @@
             <vm:VpnStatusViewModel x:Key="VpnStatus" />
             <vm:VpnDataViewModel x:Key="VpnData" />
             <vm:SettingsViewModel x:Key="Settings" />
+            <vm:DebugViewModel x:Key="DebugBindings" />
         </ResourceDictionary>
 
     </Window.Resources>
-    <Grid>
-        <DockPanel ZIndex="100" Background="#C0000000"  Visibility="{Binding Source={StaticResource IpcStatus}, Mode=OneWay, Path=LoadingIndicatorVisibility}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <controls:LoadingIndicator Grid.Row="1" Style="{StaticResource LoadingIndicatorArcsStyleKey}" IsActive="{Binding Source={StaticResource IpcStatus}, Mode=OneWay, Path=ShowLoadingIndicator}"/>
-                <Label Grid.Row="2"  Content="Connecting to Service ..." Foreground="{Binding Source={StaticResource AccentColorBrush}}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,0"></Label>
-            </Grid>
-        </DockPanel>
-        <Grid Margin="8" ZIndex="0" IsEnabled="{Binding Source={StaticResource IpcStatus}, Mode=OneWay, Path=IsInterfaceDisabled}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="10" />
-                <ColumnDefinition Width="1*"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="1*"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-            </Grid.RowDefinitions>
-            <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="1" Margin="0,5"/>
-
-            <!-- First row -->
-            <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="Debug">
+                <MenuItem Header="Open Process Directory" Command="{Binding Source={StaticResource DebugBindings}, Path=OpenExplorerInProcDir}" />
+                <MenuItem Header="Force reconnect to Service" Command="{Binding Source={StaticResource IpcStatus}, Path=ConnectCommand}" />
+                <MenuItem Header="Restart background Service" Command="{Binding Source={StaticResource DebugBindings}, Path=RestartServiceCommand}" />
+                <MenuItem Header="Start background Service" Command="{Binding Source={StaticResource DebugBindings}, Path=StartServiceCommand}" />
+                <MenuItem Header="Stop background Service" Command="{Binding Source={StaticResource DebugBindings}, Path=StopServiceCommand}" />
+            </MenuItem>
+        </Menu>
+        <Grid>
+            <DockPanel ZIndex="100" Background="#C0000000"  Visibility="{Binding Source={StaticResource IpcStatus}, Mode=OneWay, Path=LoadingIndicatorVisibility}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <controls:LoadingIndicator Grid.Row="1" Style="{StaticResource LoadingIndicatorArcsStyleKey}" IsActive="{Binding Source={StaticResource IpcStatus}, Mode=OneWay, Path=ShowLoadingIndicator}"/>
+                    <Label Grid.Row="2"  Content="Connecting to Service ..." Foreground="{Binding Source={StaticResource AccentColorBrush}}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,0"></Label>
+                </Grid>
+            </DockPanel>
+            <Grid Margin="8" ZIndex="0" IsEnabled="{Binding Source={StaticResource IpcStatus}, Mode=OneWay, Path=IsInterfaceDisabled}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0"  HorizontalAlignment="Stretch" VerticalAlignment="Center"  Text="{Binding Source={StaticResource Settings}, Mode=TwoWay, Path=CiscoCliPath}" Margin="0,0,5,0" IsEnabled="False"/>
-                <Button Grid.Column="1" HorizontalAlignment="Right" Width="25" Content="..." Command="{Binding Source={StaticResource Settings}, Path=CommandSelectCiscoCli}"/>
-            </Grid>
-
-            <!-- Second row -->
-            <Grid Grid.Row="1" Grid.Column="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="2*"/>
-                    <RowDefinition Height="2*"/>
-                    <RowDefinition Height="3*"/>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="1*"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
-                <Label Grid.Row="0" Content="Connection:" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
+                <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="1" Margin="0,5"/>
 
+                <!-- First row -->
+                <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0"  HorizontalAlignment="Stretch" VerticalAlignment="Center"  Text="{Binding Source={StaticResource Settings}, Mode=TwoWay, Path=CiscoCliPath}" Margin="0,0,5,0" IsEnabled="False"/>
+                    <Button Grid.Column="1" HorizontalAlignment="Right" Width="25" Content="..." Command="{Binding Source={StaticResource Settings}, Path=CommandSelectCiscoCli}"/>
+                </Grid>
+
+                <!-- Second row -->
                 <Grid Grid.Row="1" Grid.Column="0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="1*"/>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="3*"/>
                     </Grid.RowDefinitions>
-                    <Label Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Server Address: " FontWeight="DemiBold" />
-                    <TextBox Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Source={StaticResource VpnData}, Path=Address, Mode=TwoWay}" />
-                </Grid>
-                <Grid Grid.Row="2" Grid.Column="0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="1*"/>
-                    </Grid.RowDefinitions>
-                    <Label Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Group: " FontWeight="DemiBold" />
-                    <Grid Grid.Row="2" Grid.Column="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="40"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Source={StaticResource VpnData}, Path=Group, Mode=OneWay}" IsEnabled="False" Margin="0,0,5,0" />
-                        <Button Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="Delete" Height="18" Command="{Binding Source={StaticResource VpnData}, Path=RemoveGroup, Mode=OneWay}" IsEnabled="{Binding Source={StaticResource VpnData}, Path=IsRemoveProfileButtonEnabled}" />
+                    <Label Grid.Row="0" Content="Connection:" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
+
+                    <Grid Grid.Row="1" Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Server Address: " FontWeight="DemiBold" />
+                        <TextBox Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Source={StaticResource VpnData}, Path=Address, Mode=TwoWay}" />
                     </Grid>
+                    <Grid Grid.Row="2" Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Group: " FontWeight="DemiBold" />
+                        <Grid Grid.Row="2" Grid.Column="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="40"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Source={StaticResource VpnData}, Path=Group, Mode=OneWay}" IsEnabled="False" Margin="0,0,5,0" />
+                            <Button Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Content="Delete" Height="18" Command="{Binding Source={StaticResource VpnData}, Path=RemoveGroup, Mode=OneWay}" IsEnabled="{Binding Source={StaticResource VpnData}, Path=IsRemoveProfileButtonEnabled}" />
+                        </Grid>
+                    </Grid>
+
+                    <Grid Grid.Row="3" Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Login: " FontWeight="DemiBold" />
+
+                        <TextBox Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Source={StaticResource VpnData}, Path=Username, Mode=TwoWay}" />
+                        <PasswordBox Grid.Row="4" HorizontalAlignment="Stretch" VerticalAlignment="Center" Name="PwdVpnPassword" Margin="0,5,0,0" PasswordChanged="PwdVpnPassword_PasswordChanged"/>
+                    </Grid>
+
                 </Grid>
 
-                <Grid Grid.Row="3" Grid.Column="0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="1*"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="1*"/>
-                    </Grid.RowDefinitions>
-                    <Label Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Login: " FontWeight="DemiBold" />
-
-                    <TextBox Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Source={StaticResource VpnData}, Path=Username, Mode=TwoWay}" />
-                    <PasswordBox Grid.Row="4" HorizontalAlignment="Stretch" VerticalAlignment="Center" Name="PwdVpnPassword" Margin="0,5,0,0" PasswordChanged="PwdVpnPassword_PasswordChanged"/>
-                </Grid>
-
-            </Grid>
-
-            <!-- Third row -->
-            <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,-5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
-                <Label Grid.Column="0" Content="{Binding Path=Status, Source={StaticResource VpnStatus}, Mode=OneWay}" Margin="0,0,5,0" />
-                <Label Grid.Column="1" Content="{Binding Path=TimeConnected, Source={StaticResource VpnStatus}, Mode=OneWay}" Margin="0,0,5,0" />
-                <Canvas Grid.Column="2"  Name="CanvasStatus" Background="{Binding Path=Color, Source={StaticResource VpnStatus}, Mode=OneWay}" Width="{Binding ElementName=CanvasStatus, Path=ActualHeight, Mode=OneWay}" VerticalAlignment="Stretch" Margin="0,0,5,0"/>
-                <Button Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center" Width="125" Name="BtnAction"  Content="{Binding Source={StaticResource VpnStatus}, Path=ActionButtonText, Mode=OneWay}" IsEnabled="{Binding Source={StaticResource VpnStatus}, Path=ActionButtonEnabled, Mode=OneWay}" Click="BtnAction_Click" />
-            </Grid>
-
-            <!-- Fourth row -->
-            <Label Grid.Row="3" Grid.ColumnSpan="3"  Grid.Column="0" Content="{Binding Path=Message, Source={StaticResource VpnStatus}, Mode=OneWay}" FontStyle="Italic" Margin="0,5,0,0" HorizontalAlignment="Center"/>
-
-            <!-- second column -->
-            <Grid Grid.Row="1"  Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <CheckBox Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Save Password" Name="CbSavePassword" IsChecked="{Binding Source={StaticResource Settings}, Path=SavePassword, Mode=TwoWay}" Unchecked="CbSavePassword_Unchecked"/>
-                <CheckBox Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Connect on System Startup" IsEnabled="{Binding ElementName=CbSavePassword, Path=IsChecked, Mode=OneWay}"  IsChecked="{Binding Source={StaticResource Settings}, Path=ConnectOnSystemStartup, Mode=TwoWay}" />
-                <CheckBox Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Reconnect on connection loss" IsEnabled="{Binding ElementName=CbSavePassword, Path=IsChecked, Mode=OneWay}"  IsChecked="{Binding Source={StaticResource Settings}, Path=ReconnectOnConnectionLoss, Mode=TwoWay}" />
-                <CheckBox Grid.Row="3" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Start GUI (in tray) on logon"  IsChecked="{Binding Source={StaticResource Settings}, Path=StartGuiOnLogon, Mode=TwoWay}" />
-                <CheckBox Grid.Row="4" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Close to tray"  IsChecked="{Binding Source={StaticResource Settings}, Path=CloseToTray, Mode=TwoWay}" />
-                <Grid Grid.Row="5">
+                <!-- Third row -->
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,-5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
-                    <CheckBox Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Notify after:"  IsChecked="{Binding Source={StaticResource Settings}, Path=NotifyAfterX, Mode=TwoWay}" IsEnabled="False"/>
-                    <TextBox Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Source={StaticResource Settings}, Path=NotifyAfterHours, Mode=TwoWay}" Width="20" Margin="5,0,0,0" />
-                    <Label Content="h" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <Label Grid.Column="0" Content="{Binding Path=Status, Source={StaticResource VpnStatus}, Mode=OneWay}" Margin="0,0,5,0" />
+                    <Label Grid.Column="1" Content="{Binding Path=TimeConnected, Source={StaticResource VpnStatus}, Mode=OneWay}" Margin="0,0,5,0" />
+                    <Canvas Grid.Column="2"  Name="CanvasStatus" Background="{Binding Path=Color, Source={StaticResource VpnStatus}, Mode=OneWay}" Width="{Binding ElementName=CanvasStatus, Path=ActualHeight, Mode=OneWay}" VerticalAlignment="Stretch" Margin="0,0,5,0"/>
+                    <Button Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center" Width="125" Name="BtnAction"  Content="{Binding Source={StaticResource VpnStatus}, Path=ActionButtonText, Mode=OneWay}" IsEnabled="{Binding Source={StaticResource VpnStatus}, Path=ActionButtonEnabled, Mode=OneWay}" Click="BtnAction_Click" />
+                </Grid>
+
+                <!-- Fourth row -->
+                <Label Grid.Row="3" Grid.ColumnSpan="3"  Grid.Column="0" Content="{Binding Path=Message, Source={StaticResource VpnStatus}, Mode=OneWay}" FontStyle="Italic" Margin="0,5,0,0" HorizontalAlignment="Center"/>
+
+                <!-- second column -->
+                <Grid Grid.Row="1"  Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <CheckBox Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Save Password" Name="CbSavePassword" IsChecked="{Binding Source={StaticResource Settings}, Path=SavePassword, Mode=TwoWay}" Unchecked="CbSavePassword_Unchecked"/>
+                    <CheckBox Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Connect on System Startup" IsEnabled="{Binding ElementName=CbSavePassword, Path=IsChecked, Mode=OneWay}"  IsChecked="{Binding Source={StaticResource Settings}, Path=ConnectOnSystemStartup, Mode=TwoWay}" />
+                    <CheckBox Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Reconnect on connection loss" IsEnabled="{Binding ElementName=CbSavePassword, Path=IsChecked, Mode=OneWay}"  IsChecked="{Binding Source={StaticResource Settings}, Path=ReconnectOnConnectionLoss, Mode=TwoWay}" />
+                    <CheckBox Grid.Row="3" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Start GUI (in tray) on logon"  IsChecked="{Binding Source={StaticResource Settings}, Path=StartGuiOnLogon, Mode=TwoWay}" />
+                    <CheckBox Grid.Row="4" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Close to tray"  IsChecked="{Binding Source={StaticResource Settings}, Path=CloseToTray, Mode=TwoWay}" />
+                    <Grid Grid.Row="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Notify after:"  IsChecked="{Binding Source={StaticResource Settings}, Path=NotifyAfterX, Mode=TwoWay}" IsEnabled="False"/>
+                        <TextBox Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Source={StaticResource Settings}, Path=NotifyAfterHours, Mode=TwoWay}" Width="20" Margin="5,0,0,0" />
+                        <Label Content="h" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    </Grid>
                 </Grid>
             </Grid>
         </Grid>
-    </Grid>
-    
+    </DockPanel>
+
 </Window>

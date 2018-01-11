@@ -86,6 +86,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                     break;
                 case nameof(this.Message):
                     OnPropertyChanged(e.PropertyName);
+                    OnPropertyChanged(nameof(this.ActionButtonEnabled));
                     break;
             }
         }
@@ -211,6 +212,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                         enabled = false;
                         break;
                 }
+                enabled = true; //dirty workaround for the button to be active all the time in case of a bug
                 return enabled;
             }
         }

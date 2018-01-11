@@ -406,6 +406,36 @@ namespace CiscoAnyconnectControl.Utility
         }
 
         /// <summary>
+        /// Takes a service name and starts it
+        /// </summary>
+        /// <param name="Name">The service name</param>
+        public static void RestartService(string Name)
+        {
+            IntPtr scman = OpenSCManager(ServiceManagerRights.Connect);
+            try
+            {
+                IntPtr hService = OpenService(scman, Name, ServiceRights.QueryStatus |
+                                                           ServiceRights.Start | ServiceRights.Stop);
+                if (hService == IntPtr.Zero)
+                {
+                    throw new ApplicationException("Could not open service.");
+                }
+                try
+                {
+                    RestartService(hService);
+                }
+                finally
+                {
+                    CloseServiceHandle(hService);
+                }
+            }
+            finally
+            {
+                CloseServiceHandle(scman);
+            }
+        }
+
+        /// <summary>
         /// Stars the provided windows service
         /// </summary>
         /// <param name="hService">The handle to the windows service</param>
@@ -425,6 +455,17 @@ namespace CiscoAnyconnectControl.Utility
             SERVICE_STATUS status = new SERVICE_STATUS();
             ControlService(hService, ServiceControl.Stop, status);
             WaitForServiceStatus(hService, ServiceState.Stopping, ServiceState.Stop);
+        }
+
+        /// <summary>
+        /// Restarts the provided windows service
+        /// </summary>
+        /// <param name="hService">The handle to the windows service</param>
+        private static void RestartService(IntPtr hService)
+        {
+            StopService(hService);
+            StartService(hService);
+
         }
 
         /// <summary>

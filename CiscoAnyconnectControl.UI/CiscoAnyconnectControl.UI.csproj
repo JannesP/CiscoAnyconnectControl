@@ -65,6 +65,7 @@
     <Compile Include="Utility\OSUtil.cs" />
     <Compile Include="Utility\WindowsOSUtil.cs" />
     <Compile Include="ViewModel\Converters\IntConverter.cs" />
+    <Compile Include="ViewModel\DebugViewModel.cs" />
     <Compile Include="ViewModel\IpcStatusViewModel.cs" />
     <Compile Include="ViewModel\SettingsViewModel.cs" />
     <Compile Include="ViewModel\VpnDataViewModel.cs" />
