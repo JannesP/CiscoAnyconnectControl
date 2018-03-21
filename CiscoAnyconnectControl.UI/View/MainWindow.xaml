@@ -168,9 +168,9 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <CheckBox Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Notify after:"  IsChecked="{Binding Source={StaticResource Settings}, Path=NotifyAfterX, Mode=TwoWay}" IsEnabled="False"/>
-                        <TextBox Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Source={StaticResource Settings}, Path=NotifyAfterHours, Mode=TwoWay}" Width="20" Margin="5,0,0,0" />
-                        <Label Content="h" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <CheckBox Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Notify after 09:50 with msgbox"  IsChecked="{Binding Source={StaticResource Settings}, Path=NotifyAfterX, Mode=TwoWay}"/>
+                        <!--<TextBox Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Text="{Binding Source={StaticResource Settings}, Path=NotifyAfterHours, Mode=TwoWay}" Width="20" Margin="5,0,0,0" />
+                        <Label Content="h" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center"/>-->
                     </Grid>
                 </Grid>
             </Grid>

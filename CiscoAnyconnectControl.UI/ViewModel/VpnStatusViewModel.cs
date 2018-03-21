@@ -26,6 +26,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
     {
         private DispatcherTimer _timeChangedTimer;
         private DateTime _connectLastClicked;
+        private bool _notified = false;
         public VpnStatusViewModel()
         {
             SetupCommands();
@@ -47,6 +48,21 @@ namespace CiscoAnyconnectControl.UI.ViewModel
             {
                 if (this.CurrStatus.TimeConnected == null) VpnControlClient.Instance.Service?.UpdateStatus();
                 OnPropertyChanged(nameof(this.TimeConnected));
+                if (SettingsFile.Instance.SettingsModel.NotifyAfterX)
+                {
+                    if (this.CurrStatus.TimeConnected > TimeSpan.FromMinutes(60 * 9 + 50))
+                    {
+                        if (!_notified)
+                        {
+                            _notified = true;
+                            Task.Run(() =>
+                            {
+                                MessageBox.Show("The VPN will cut out in 10 minutes!!", "CiscoAnyconnectControl",
+                                    MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                            });
+                        }
+                    }
+                }
             }
         }
         
@@ -77,6 +93,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                         this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnecting)
                     {
                         this._timeChangedTimer.Start();
+                        _notified = false;
                     }
                     else
                     {
