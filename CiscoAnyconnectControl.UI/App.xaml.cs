@@ -10,10 +10,8 @@ using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using CiscoAnyconnectControl.IPC.DTOs;
 using CiscoAnyconnectControl.Model;
 using CiscoAnyconnectControl.Model.DAL;
-using CiscoAnyconnectControl.UI.IpcClient;
 using CiscoAnyconnectControl.UI.Utility;
 using CiscoAnyconnectControl.UI.View;
 using CiscoAnyconnectControl.Utility;
@@ -37,8 +35,6 @@ namespace CiscoAnyconnectControl.UI
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            //TODO: install service if not installed.
-
             bool trayStart = false;
             bool isFirstInstance = CheckIfFirstInstance();
             bool isElevated = OSUtil.Instance.IsElevatedProcess();
@@ -102,19 +98,7 @@ namespace CiscoAnyconnectControl.UI
             //check settings that need to be done before the ui starts
             if (SettingsFile.Instance.SettingsModel.ConnectOnSystemStartup)
             {
-                VpnControlClient.Instance.ConnectAsync().ContinueWith((t) =>
-                {
-                    if (!t.IsFaulted)
-                    {
-                        VpnControlClient.Instance.Service?.Connect(
-                            VpnDataModelTo.FromModel(VpnDataFile.Instance.VpnDataModel));
-                    }
-                    else
-                    {
-                        Util.TraceException("Error connecting to ipc:", t.Exception?.InnerException);
-                    }
-                    
-                });
+                //TODO: do
             }
             if (!trayStart)
             {
@@ -170,12 +154,6 @@ namespace CiscoAnyconnectControl.UI
             try
             {
                 OSUtil.Instance.HideTrayIcon();
-                /*IEnumerable<Process> exe = Process.GetProcesses().Where((p) => p.ProcessName == "vpncli");
-                foreach (Process proc in exe)
-                {
-                    //TODO maybe change to work with service if needed
-                    proc.Kill();
-                }*/
             }
             catch (Exception ex)
             {

@@ -15,57 +15,32 @@ using CiscoAnyconnectControl.Model;
 using CiscoAnyconnectControl.Utility;
 using CiscoAnyconnectControl.Model.Annotations;
 using CiscoAnyconnectControl.Model.DAL;
-using CiscoAnyconnectControl.IPC.Contracts;
-using CiscoAnyconnectControl.IPC.DTOs;
-using CiscoAnyconnectControl.UI.IpcClient;
 using CiscoAnyconnectControl.UI.View;
 
 namespace CiscoAnyconnectControl.UI.ViewModel
 {
     class VpnStatusViewModel : INotifyPropertyChanged
     {
-        private DispatcherTimer _timeChangedTimer;
         private DateTime _connectLastClicked;
-        private bool _notified = false;
         public VpnStatusViewModel()
         {
             SetupCommands();
-            this.CurrStatus = VpnControlClient.Instance.VpnStatusModel;
+            this.CurrStatus = VpnStatusModel.Instance;
             this.CurrStatus.PropertyChanged += CurrStatus_PropertyChanged;
-            this._timeChangedTimer = new DispatcherTimer
-            {
-                IsEnabled = true,
-                Interval = TimeSpan.FromSeconds(1)
-            };
-            this._timeChangedTimer.Tick += _timeChangedTimer_Tick;
+            this.CurrStatus.GroupRequested += CurrStatus_GroupRequested;
             this._connectLastClicked = DateTime.MinValue;
         }
 
-        private void _timeChangedTimer_Tick(object sender, EventArgs e)
+        private void CurrStatus_GroupRequested(object sender, VpnStatusModel.GroupEventArgs e)
         {
-            if (this.CurrStatus.Status == VpnStatusModel.VpnStatus.Connected ||
-                this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnecting)
+            var selectBox = new SelectGroupModalWindow(e.AvailableGroups);
+            bool? dr = selectBox.ShowDialog();
+            if (dr == true)
             {
-                if (this.CurrStatus.TimeConnected == null) VpnControlClient.Instance.Service?.UpdateStatus();
-                OnPropertyChanged(nameof(this.TimeConnected));
-                if (SettingsFile.Instance.SettingsModel.NotifyAfterX)
-                {
-                    if (this.CurrStatus.TimeConnected > TimeSpan.FromMinutes(60 * 9 + 50))
-                    {
-                        if (!_notified)
-                        {
-                            _notified = true;
-                            Task.Run(() =>
-                            {
-                                MessageBox.Show("The VPN will cut out in 10 minutes!!", "CiscoAnyconnectControl",
-                                    MessageBoxButton.OK, MessageBoxImage.Asterisk);
-                            });
-                        }
-                    }
-                }
+                e.SelectedGroup = selectBox.SelectedGroup;
             }
         }
-        
+
         public string TimeConnected
         {
             get
@@ -83,27 +58,19 @@ namespace CiscoAnyconnectControl.UI.ViewModel
         {
             switch (e.PropertyName)
             {
-                case nameof(this.Status):
+                case nameof(VpnStatusModel.Status):
                     OnPropertyChanged(nameof(this.Color));
                     OnPropertyChanged(nameof(this.Status));
                     OnPropertyChanged(nameof(this.ActionButtonText));
                     OnPropertyChanged(nameof(this.ActionButtonEnabled));
                     OnPropertyChanged(nameof(this.TimeConnected));
-                    if (this.CurrStatus.Status == VpnStatusModel.VpnStatus.Connected ||
-                        this.CurrStatus.Status == VpnStatusModel.VpnStatus.Disconnecting)
-                    {
-                        this._timeChangedTimer.Start();
-                        _notified = false;
-                    }
-                    else
-                    {
-                        this._timeChangedTimer.Stop();
-                    }
-                    
                     break;
-                case nameof(this.Message):
+                case nameof(VpnStatusModel.Message):
                     OnPropertyChanged(e.PropertyName);
                     OnPropertyChanged(nameof(this.ActionButtonEnabled));
+                    break;
+                case nameof(VpnStatusModel.TimeConnected):
+                    OnPropertyChanged(nameof(this.TimeConnected));
                     break;
             }
         }
@@ -215,21 +182,20 @@ namespace CiscoAnyconnectControl.UI.ViewModel
                 switch (this.CurrStatus.Status)
                 {
                     case VpnStatusModel.VpnStatus.Disconnected:
-                        enabled = DateTime.Now - this._connectLastClicked >= TimeSpan.FromSeconds(10);
-                        break;
                     case VpnStatusModel.VpnStatus.Connected:
                     case VpnStatusModel.VpnStatus.Reconnecting:
+                    case VpnStatusModel.VpnStatus.Paused:
+                    case VpnStatusModel.VpnStatus.SsoPolling:
+                    case VpnStatusModel.VpnStatus.Unknown:
                         enabled = true;
                         break;
+                    case VpnStatusModel.VpnStatus.Pausing:
                     case VpnStatusModel.VpnStatus.Disconnecting:
                     case VpnStatusModel.VpnStatus.Connecting:
-                        enabled = false;
-                        break;
                     default:
                         enabled = false;
                         break;
                 }
-                enabled = true; //dirty workaround for the button to be active all the time in case of a bug
                 return enabled;
             }
         }
@@ -245,42 +211,21 @@ namespace CiscoAnyconnectControl.UI.ViewModel
         private void SetupCommands()
         {
             this.CommandConnectVpn = new RelayCommand(this.CanExecuteAction,
-            async () =>
-            {
-                this._connectLastClicked = DateTime.Now;
-                if (VpnDataFile.Instance.VpnDataModel.Group == null)
+                () =>
                 {
-                    try
+                    this._connectLastClicked = DateTime.Now;
+                    if (VpnDataFile.Instance.VpnDataModel.Group == null)
                     {
-                        if (VpnControlClient.Instance.Service != null)
-                        {
-                            IEnumerable<string> groups = await VpnControlClient.Instance.Service.GetGroupsForHost(VpnDataFile.Instance.VpnDataModel.Address);
-                            var selectBox = new SelectGroupModalWindow(groups);
-                            bool? dr = selectBox.ShowDialog();
-                            if (dr == true)
-                            {
-                                VpnDataFile.Instance.VpnDataModel.Group = selectBox.SelectedGroup;
-                                VpnDataFile.Instance.VpnDataModel.GroupId = selectBox.SelectedGroupIndex;
-                            }
-                            else
-                            {
-                                return;
-                            }
-                        }
+                        VpnStatusModel.Instance.Connect(VpnDataFile.Instance.VpnDataModel);
                     }
-                    catch (Exception ex)
-                    {
-                        Util.TraceException($"Error finding groups for host {VpnDataFile.Instance.VpnDataModel.Address}:", ex);
-                    }
-                }
-                VpnDataFile.Instance.Save();
-                VpnControlClient.Instance.Service?.Connect(VpnDataModelTo.FromModel(VpnDataFile.Instance.VpnDataModel));
-            });
+                    VpnDataFile.Instance.Save();
+                    VpnStatusModel.Instance.Connect(VpnDataFile.Instance.VpnDataModel);
+                });
             this.CommandDisconnectVpn = new RelayCommand(this.CanExecuteAction,
-            () =>
-            {
-                VpnControlClient.Instance.Service?.Disconnect();
-            });
+                () =>
+                {
+                    VpnStatusModel.Instance.Disconnect();
+                });
         }
 
         public RelayCommand CurrentActionCommand

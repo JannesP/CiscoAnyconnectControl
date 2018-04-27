@@ -81,14 +81,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CiscoAnyconnectControl.IPC\CiscoAnyconnectControl.IPC.csproj">
-      <Project>{c02c137f-5602-40ab-a584-f4d3a23663d1}</Project>
-      <Name>CiscoAnyconnectControl.IPC</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CiscoAnyConnectControl.Service\CiscoAnyConnectControl.Service.csproj">
-      <Project>{b0d8309e-4ffd-4942-a80e-1393ff478680}</Project>
-      <Name>CiscoAnyConnectControl.Service</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CiscoAnyconnectControl.Utility\CiscoAnyconnectControl.Utility.csproj">
       <Project>{62C43C62-81DF-4404-8C27-12DB3D0B5C3F}</Project>
       <Name>CiscoAnyconnectControl.Utility</Name>

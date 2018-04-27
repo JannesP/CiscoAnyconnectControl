@@ -50,10 +50,6 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CiscoAnyconnectControl.CiscoCliWrapper\CiscoAnyconnectControl.CiscoCliWrapper.csproj">
-      <Project>{4d636419-a89c-46e4-b30f-b4a48705a831}</Project>
-      <Name>CiscoAnyconnectControl.CiscoCliWrapper</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CiscoAnyconnectControl.IPC\CiscoAnyconnectControl.IPC.csproj">
       <Project>{c02c137f-5602-40ab-a584-f4d3a23663d1}</Project>
       <Name>CiscoAnyconnectControl.IPC</Name>
