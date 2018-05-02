@@ -1,6 +1,7 @@
 ﻿using CiscoAnyconnectControl.UI.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using CiscoAnyconnectControl.UI.ViewModel.DesignMocks;
 
 namespace CiscoAnyconnectControl.UI.View
 {
@@ -49,7 +51,7 @@ namespace CiscoAnyconnectControl.UI.View
         private void BtnAction_Click(object sender, RoutedEventArgs e)
         {
             _vpnDataViewModel.SaveToModel.Execute();
-            _vpnStatusViewModel.CurrentActionCommand.Execute();
+            _vpnStatusViewModel?.CurrentActionCommand?.Execute();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

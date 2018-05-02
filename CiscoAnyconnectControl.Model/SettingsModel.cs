@@ -8,7 +8,6 @@ namespace CiscoAnyconnectControl.Model
     [Serializable]
     public class SettingsModel : INotifyPropertyChanged
     {
-        private string _ciscoCliPath = @"C:\Program Files (x86)\Cisco\Cisco AnyConnect Secure Mobility Client\vpncli.exe";
         private bool _savePassword = true;
         private bool _connectOnSystemStartup = true;
         private bool _reconnectOnConnectionLoss = true;
@@ -16,17 +15,6 @@ namespace CiscoAnyconnectControl.Model
         private bool _notifyAfterX = true;
         private int _notifyAfterHours = 9;
         private bool _closeToTray;
-
-        public string CiscoCliPath
-        {
-            get => _ciscoCliPath;
-            set
-            {
-                if (_ciscoCliPath == value) return;
-                _ciscoCliPath = value;
-                OnPropertyChanged();
-            }
-        }
 
         public bool SavePassword
         {

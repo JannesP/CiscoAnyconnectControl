@@ -65,10 +65,12 @@
     <Compile Include="Utility\WindowsOSUtil.cs" />
     <Compile Include="ViewModel\Converters\IntConverter.cs" />
     <Compile Include="ViewModel\DebugViewModel.cs" />
+    <Compile Include="ViewModel\IVpnStatusViewModel.cs" />
     <Compile Include="ViewModel\SettingsViewModel.cs" />
     <Compile Include="ViewModel\VpnDataViewModel.cs" />
     <Compile Include="ViewModel\VpnStatusViewModel.cs" />
     <Compile Include="View\Controls\LoadingIndicator.cs" />
+    <Compile Include="ViewModel\DesignMocks\VpnStatusViewModelMock.cs" />
     <Compile Include="View\SelectGroupModalWindow.xaml.cs">
       <DependentUpon>SelectGroupModalWindow.xaml</DependentUpon>
     </Compile>

@@ -22,28 +22,10 @@ namespace CiscoAnyconnectControl.UI.ViewModel
     {
         public SettingsViewModel()
         {
-            this.CommandSelectCiscoCli = new RelayCommand(() => true, () =>
-            {
-                var ofd = new OpenFileDialog
-                {
-                    CheckFileExists = true,
-                    CheckPathExists = true,
-                    InitialDirectory = @"C:\Program Files (x86)\",
-                    DefaultExt = "*.exe",
-                    Multiselect = false
-                };
-                bool? success = ofd.ShowDialog();
-                if (success != null && success.Value)
-                {
-                    this.CiscoCliPath = ofd.FileName;
-                }
-            });
-
             this.CommandSaveToPersistentStorage = new RelayCommand(() => true, () =>
             {
                 SettingsFile.Instance.Save();
             });
-            OnPropertyChanged(nameof(StartGuiOnLogon));
             SettingsFile.Instance.SettingsModel.PropertyChanged += SettingsModel_PropertyChanged;
         }
 
@@ -53,12 +35,6 @@ namespace CiscoAnyconnectControl.UI.ViewModel
             {
                 OnPropertyChanged(e.PropertyName);
             }
-        }
-
-        public string CiscoCliPath
-        {
-            get => SettingsFile.Instance.SettingsModel.CiscoCliPath;
-            set => SettingsFile.Instance.SettingsModel.CiscoCliPath = value;
         }
 
         public bool SavePassword

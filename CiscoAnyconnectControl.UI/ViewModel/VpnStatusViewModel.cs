@@ -19,7 +19,7 @@ using CiscoAnyconnectControl.UI.View;
 
 namespace CiscoAnyconnectControl.UI.ViewModel
 {
-    class VpnStatusViewModel : INotifyPropertyChanged
+    class VpnStatusViewModel : INotifyPropertyChanged, IVpnStatusViewModel
     {
         private DateTime _connectLastClicked;
         public VpnStatusViewModel()
@@ -75,7 +75,7 @@ namespace CiscoAnyconnectControl.UI.ViewModel
             }
         }
 
-        public VpnStatusModel CurrStatus { get; set; }
+        private VpnStatusModel CurrStatus { get; set; }
 
         public string Color
         {
