@@ -43,6 +43,13 @@ namespace CiscoAnyconnectControl.UI
             bool isElevated = OSUtil.Instance.IsElevatedProcess();
             bool nonElevatedAllowed = false;
 
+            try
+            {
+                ServiceUtil.Uninstall("CiscoAnyconnectControlServer");
+            }
+            catch(Exception) { //ignored
+            }
+
             //parse command line arguments
             foreach (string arg in e.Args)
             {

@@ -116,8 +116,12 @@ namespace CiscoAnyconnectControl.Model
             }
             set
             {
-                this._timeConnected = value;
-                OnPropertyChanged();
+                if (value != _timeConnected)
+                {
+                    this._timeConnected = value;
+                    OnPropertyChanged();
+
+                }
             }
         }
 
