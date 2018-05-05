@@ -251,6 +251,7 @@ namespace CiscoAnyconnectControl.UI
             this._evtShowWindow?.Dispose();
             this._evtShowWindow = null;
             _ctsExiting?.Dispose();
+            VpnStatusModel.Instance.Dispose();
             base.OnExit(e);
         }
     }
