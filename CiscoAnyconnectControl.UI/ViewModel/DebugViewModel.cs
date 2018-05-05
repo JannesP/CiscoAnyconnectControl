@@ -17,17 +17,17 @@ namespace CiscoAnyconnectControl.UI.ViewModel
         public RelayCommand RestartServiceCommand => new RelayCommand(() => true, () =>
         {
             IsAdministrator();
-            ServiceUtil.Restart(IPC.SharedSettings.ServiceName, 10000);
+            //ServiceUtil.Restart(IPC.SharedSettings.ServiceName, 10000);
         });
         public RelayCommand StopServiceCommand => new RelayCommand(() => true, () =>
         {
             IsAdministrator();
-            ServiceUtil.Stop(IPC.SharedSettings.ServiceName, 10000);
+            //ServiceUtil.Stop(IPC.SharedSettings.ServiceName, 10000);
         });
         public RelayCommand StartServiceCommand => new RelayCommand(() => true, () =>
         {
             IsAdministrator();
-            ServiceUtil.Start(IPC.SharedSettings.ServiceName, 10000);
+            //ServiceUtil.Start(IPC.SharedSettings.ServiceName, 10000);
         });
 
         private static bool IsAdministrator()

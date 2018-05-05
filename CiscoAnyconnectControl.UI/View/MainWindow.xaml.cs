@@ -1,6 +1,7 @@
 ﻿using CiscoAnyconnectControl.UI.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using CiscoAnyconnectControl.UI.ViewModel.DesignMocks;
 
 namespace CiscoAnyconnectControl.UI.View
 {
@@ -25,7 +27,6 @@ namespace CiscoAnyconnectControl.UI.View
         private VpnDataViewModel _vpnDataViewModel = null;
         private VpnStatusViewModel _vpnStatusViewModel = null;
         private SettingsViewModel _settingsViewModel = null;
-        private IpcStatusViewModel _ipcStatusViewModel = null;
         private PasswordBox _pwdBox = null;
 
         public MainWindow()
@@ -38,10 +39,8 @@ namespace CiscoAnyconnectControl.UI.View
             _vpnDataViewModel = (VpnDataViewModel) FindResource("VpnData");
             _vpnStatusViewModel = (VpnStatusViewModel) FindResource("VpnStatus");
             _settingsViewModel = (SettingsViewModel) FindResource("Settings");
-            _ipcStatusViewModel = (IpcStatusViewModel) FindResource("IpcStatus");
             _pwdBox = (PasswordBox)FindName("PwdVpnPassword");
             if (_pwdBox != null) _pwdBox.Password = _vpnDataViewModel.Password;
-            _ipcStatusViewModel.Connect();
         }
 
         private void PwdVpnPassword_PasswordChanged(object sender, RoutedEventArgs e)
@@ -52,7 +51,7 @@ namespace CiscoAnyconnectControl.UI.View
         private void BtnAction_Click(object sender, RoutedEventArgs e)
         {
             _vpnDataViewModel.SaveToModel.Execute();
-            _vpnStatusViewModel.CurrentActionCommand.Execute();
+            _vpnStatusViewModel?.CurrentActionCommand?.Execute();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -63,11 +62,6 @@ namespace CiscoAnyconnectControl.UI.View
         private void CbSavePassword_Unchecked(object sender, RoutedEventArgs e)
         {
             this._pwdBox.Password = "";
-        }
-
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            _ipcStatusViewModel.Disconnect();
         }
     }
 }

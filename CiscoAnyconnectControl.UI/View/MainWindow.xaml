@@ -6,11 +6,11 @@
         xmlns:local="clr-namespace:CiscoAnyconnectControl.UI"
         xmlns:vm="clr-namespace:CiscoAnyconnectControl.UI.ViewModel"
         mc:Ignorable="d"
-        Title="Cisco Anyconnect Control" Height="255" Width="400" Loaded="Window_Loaded"
-        MinHeight="275" MinWidth="400" Closing="Window_Closing" Closed="Window_Closed" >
+        Title="Cisco Anyconnect Control" Height="289.023" Width="399.221" Loaded="Window_Loaded"
+        MinHeight="275" MinWidth="400" Closing="Window_Closing">
     <Window.Resources>
 
-        <ResourceDictionary>
+        <ResourceDictionary x:Name="ResDict">
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Controls/Resources/LoadingArcs.xaml" />
             </ResourceDictionary.MergedDictionaries>
@@ -19,7 +19,6 @@
                 <Setter Property="Height" Value="18"/>
                 <Setter Property="Padding" Value="0, 0, 0, 0"/>
             </Style>
-            <vm:IpcStatusViewModel x:Key="IpcStatus"/>
             <vm:VpnStatusViewModel x:Key="VpnStatus" />
             <vm:VpnDataViewModel x:Key="VpnData" />
             <vm:SettingsViewModel x:Key="Settings" />
@@ -31,14 +30,14 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Debug">
                 <MenuItem Header="Open Process Directory" Command="{Binding Source={StaticResource DebugBindings}, Path=OpenExplorerInProcDir}" />
-                <MenuItem Header="Force reconnect to Service" Command="{Binding Source={StaticResource IpcStatus}, Path=ConnectCommand}" />
-                <MenuItem Header="Restart background Service" Command="{Binding Source={StaticResource DebugBindings}, Path=RestartServiceCommand}" />
-                <MenuItem Header="Start background Service" Command="{Binding Source={StaticResource DebugBindings}, Path=StartServiceCommand}" />
-                <MenuItem Header="Stop background Service" Command="{Binding Source={StaticResource DebugBindings}, Path=StopServiceCommand}" />
+                <MenuItem Header="Restart background Service" Command="{Binding Source={StaticResource DebugBindings}, Path=RestartServiceCommand}" IsEnabled="False" />
+                <MenuItem Header="Start background Service" Command="{Binding Source={StaticResource DebugBindings}, Path=StartServiceCommand}" IsEnabled="False" />
+                <MenuItem Header="Stop background Service" Command="{Binding Source={StaticResource DebugBindings}, Path=StopServiceCommand}" IsEnabled="False" />
             </MenuItem>
         </Menu>
         <Grid>
-            <DockPanel ZIndex="100" Background="#C0000000"  Visibility="{Binding Source={StaticResource IpcStatus}, Mode=OneWay, Path=LoadingIndicatorVisibility}">
+            <!-- TODO: implement connection indicator if cisco service is not available -->
+            <DockPanel ZIndex="100" Background="#C0000000"  Visibility="Collapsed">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition/>
@@ -46,11 +45,11 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <controls:LoadingIndicator Grid.Row="1" Style="{StaticResource LoadingIndicatorArcsStyleKey}" IsActive="{Binding Source={StaticResource IpcStatus}, Mode=OneWay, Path=ShowLoadingIndicator}"/>
+                    <controls:LoadingIndicator Grid.Row="1" Style="{StaticResource LoadingIndicatorArcsStyleKey}" IsActive="False"/>
                     <Label Grid.Row="2"  Content="Connecting to Service ..." Foreground="{Binding Source={StaticResource AccentColorBrush}}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,0"></Label>
                 </Grid>
             </DockPanel>
-            <Grid Margin="8" ZIndex="0" IsEnabled="{Binding Source={StaticResource IpcStatus}, Mode=OneWay, Path=IsInterfaceDisabled}">
+            <Grid Margin="8" ZIndex="0" IsEnabled="True">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="10" />
@@ -63,16 +62,6 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
                 <GridSplitter Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="1" Margin="0,5"/>
-
-                <!-- First row -->
-                <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox Grid.Column="0"  HorizontalAlignment="Stretch" VerticalAlignment="Center"  Text="{Binding Source={StaticResource Settings}, Mode=TwoWay, Path=CiscoCliPath}" Margin="0,0,5,0" IsEnabled="False"/>
-                    <Button Grid.Column="1" HorizontalAlignment="Right" Width="25" Content="..." Command="{Binding Source={StaticResource Settings}, Path=CommandSelectCiscoCli}"/>
-                </Grid>
 
                 <!-- Second row -->
                 <Grid Grid.Row="1" Grid.Column="0">

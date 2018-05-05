@@ -60,17 +60,17 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Command\RelayCommand.cs" />
-    <Compile Include="IpcClient\VpnControlClient.cs" />
     <Compile Include="Utility\I_OSUtil.cs" />
     <Compile Include="Utility\OSUtil.cs" />
     <Compile Include="Utility\WindowsOSUtil.cs" />
     <Compile Include="ViewModel\Converters\IntConverter.cs" />
     <Compile Include="ViewModel\DebugViewModel.cs" />
-    <Compile Include="ViewModel\IpcStatusViewModel.cs" />
+    <Compile Include="ViewModel\IVpnStatusViewModel.cs" />
     <Compile Include="ViewModel\SettingsViewModel.cs" />
     <Compile Include="ViewModel\VpnDataViewModel.cs" />
     <Compile Include="ViewModel\VpnStatusViewModel.cs" />
     <Compile Include="View\Controls\LoadingIndicator.cs" />
+    <Compile Include="ViewModel\DesignMocks\VpnStatusViewModelMock.cs" />
     <Compile Include="View\SelectGroupModalWindow.xaml.cs">
       <DependentUpon>SelectGroupModalWindow.xaml</DependentUpon>
     </Compile>
@@ -122,10 +122,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CiscoAnyconnectControl.IPC\CiscoAnyconnectControl.IPC.csproj">
-      <Project>{c02c137f-5602-40ab-a584-f4d3a23663d1}</Project>
-      <Name>CiscoAnyconnectControl.IPC</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CiscoAnyconnectControl.Model\CiscoAnyconnectControl.Model.csproj">
       <Project>{81307bfc-ddab-4a6f-b8cb-dd5498ab17cf}</Project>
       <Name>CiscoAnyconnectControl.Model</Name>

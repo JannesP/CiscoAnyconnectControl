@@ -10,10 +10,8 @@ using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using CiscoAnyconnectControl.IPC.DTOs;
 using CiscoAnyconnectControl.Model;
 using CiscoAnyconnectControl.Model.DAL;
-using CiscoAnyconnectControl.UI.IpcClient;
 using CiscoAnyconnectControl.UI.Utility;
 using CiscoAnyconnectControl.UI.View;
 using CiscoAnyconnectControl.Utility;
@@ -26,6 +24,9 @@ namespace CiscoAnyconnectControl.UI
     public partial class App : Application
     {
         private Mutex _mutex;
+        private string EventWaitHandleShowWindowName => "jannesp.ciscoanyconnectcontrol.evt_showwindow";
+        private EventWaitHandle _evtShowWindow;
+        private readonly CancellationTokenSource _ctsExiting = new CancellationTokenSource();
 
         private enum ErrorCode
         {
@@ -37,12 +38,17 @@ namespace CiscoAnyconnectControl.UI
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            //TODO: install service if not installed.
-
             bool trayStart = false;
             bool isFirstInstance = CheckIfFirstInstance();
             bool isElevated = OSUtil.Instance.IsElevatedProcess();
             bool nonElevatedAllowed = false;
+
+            try
+            {
+                ServiceUtil.Uninstall("CiscoAnyconnectControlServer");
+            }
+            catch(Exception) { //ignored
+            }
 
             //parse command line arguments
             foreach (string arg in e.Args)
@@ -67,9 +73,51 @@ namespace CiscoAnyconnectControl.UI
             }
             if (!isFirstInstance)
             {
-                MessageBox.Show("Another instance is already running. Showing that isnt implemented though.");
+                try
+                {
+                    _evtShowWindow = EventWaitHandle.OpenExisting(EventWaitHandleShowWindowName);
+                    _evtShowWindow.Set();
+                    _evtShowWindow.Dispose();
+                    _evtShowWindow = null;
+                    Trace.TraceInformation("Showed existing instance and exiting ...");
+                }
+                catch (Exception ex)
+                {
+                    Util.TraceException("Error showing existing instance", ex);
+                    MessageBox.Show("Another instance is already running but there was an error showing that.");
+                }
                 App.Current.Shutdown((int)ErrorCode.NotFirstInstance);
                 return;
+            }
+            try
+            {
+                _evtShowWindow = new EventWaitHandle(false, EventResetMode.ManualReset, EventWaitHandleShowWindowName, out bool createdNew);
+                if (!createdNew)
+                {
+                    _evtShowWindow.Set();
+                    App.Current.Shutdown(0);
+                    return;
+                }
+                else
+                {
+                    Task.Run(() =>
+                    {
+                        CancellationToken ct = _ctsExiting.Token;
+                        while (!ct.IsCancellationRequested)
+                        {
+                            _evtShowWindow.WaitOne();
+                            if (!ct.IsCancellationRequested)
+                            {
+                                App.Current.Dispatcher.Invoke(CreateAndOrShowMainWindow);
+                                _evtShowWindow.Reset();
+                            }
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Util.TraceException("Error creating mutex for showwindow", ex);
             }
             if (!isElevated)
             {
@@ -102,23 +150,19 @@ namespace CiscoAnyconnectControl.UI
             //check settings that need to be done before the ui starts
             if (SettingsFile.Instance.SettingsModel.ConnectOnSystemStartup)
             {
-                VpnControlClient.Instance.ConnectAsync().ContinueWith((t) =>
+                Task.Run(() =>
                 {
-                    if (!t.IsFaulted)
+                    while (VpnStatusModel.Instance.Status == VpnStatusModel.VpnStatus.Disconnected)
                     {
-                        VpnControlClient.Instance.Service?.Connect(
-                            VpnDataModelTo.FromModel(VpnDataFile.Instance.VpnDataModel));
+                        VpnStatusModel.Instance.Connect(VpnDataFile.Instance.VpnDataModel);
+                        Thread.Sleep(1000);
                     }
-                    else
-                    {
-                        Util.TraceException("Error connecting to ipc:", t.Exception?.InnerException);
-                    }
-                    
                 });
             }
             if (!trayStart)
             {
                 CreateAndOrShowMainWindow();
+                OSUtil.Instance.ShowTrayIcon();
             }
             App.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             App.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
@@ -143,6 +187,8 @@ namespace CiscoAnyconnectControl.UI
             }
             else
             {
+                if (App.Current.MainWindow.WindowState == WindowState.Minimized)
+                    App.Current.MainWindow.WindowState = WindowState.Normal;
                 App.Current.MainWindow.Activate();
             }
         }
@@ -170,12 +216,6 @@ namespace CiscoAnyconnectControl.UI
             try
             {
                 OSUtil.Instance.HideTrayIcon();
-                /*IEnumerable<Process> exe = Process.GetProcesses().Where((p) => p.ProcessName == "vpncli");
-                foreach (Process proc in exe)
-                {
-                    //TODO maybe change to work with service if needed
-                    proc.Kill();
-                }*/
             }
             catch (Exception ex)
             {
@@ -204,8 +244,13 @@ namespace CiscoAnyconnectControl.UI
         protected override void OnExit(ExitEventArgs e)
         {
             OSUtil.Instance.HideTrayIcon();
+            _ctsExiting.Cancel();
+            _evtShowWindow?.Set();
             this._mutex?.Dispose();
             this._mutex = null;
+            this._evtShowWindow?.Dispose();
+            this._evtShowWindow = null;
+            _ctsExiting?.Dispose();
             base.OnExit(e);
         }
     }
