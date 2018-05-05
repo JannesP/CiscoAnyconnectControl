@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CiscoAnyconnectControl.Model.Annotations;
@@ -15,7 +16,7 @@ using VpnApiLib;
 
 namespace CiscoAnyconnectControl.Model
 {
-    public class VpnStatusModel : INotifyPropertyChanged
+    public class VpnStatusModel : INotifyPropertyChanged, IDisposable
     {
         public class GroupEventArgs : EventArgs
         {
@@ -57,8 +58,15 @@ namespace CiscoAnyconnectControl.Model
         private VpnStatusModel()
         {
             _vpnApi = new VpnApi();
-            _vpnApi.Register(new VpnApiEventListener(this));
-            _vpnApi.Attach();
+            _vpnApi.RegisterAndAttach(new VpnApiEventListener(this));
+            if (!_vpnApi.IsVPNServiceAvailable)
+            {
+                Task.Run(() =>
+                {
+                    Thread.Sleep(1000);
+                    OnNotice("The VPN service is not available.", NoticeType.Error);
+                });
+            }
         }
 
         public enum VpnStatus
@@ -341,6 +349,11 @@ namespace CiscoAnyconnectControl.Model
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void Dispose()
+        {
+            _vpnApi?.UnregisterAndDetach();
         }
     }
 }

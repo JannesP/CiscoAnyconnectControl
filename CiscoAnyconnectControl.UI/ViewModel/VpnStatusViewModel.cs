@@ -28,17 +28,40 @@ namespace CiscoAnyconnectControl.UI.ViewModel
             this.CurrStatus = VpnStatusModel.Instance;
             this.CurrStatus.PropertyChanged += CurrStatus_PropertyChanged;
             this.CurrStatus.GroupRequested += CurrStatus_GroupRequested;
+            this.CurrStatus.Notice += CurrStatus_Notice;
             this._connectLastClicked = DateTime.MinValue;
+        }
+
+        private void CurrStatus_Notice(object sender, VpnStatusModel.NoticeEventArgs e)
+        {
+            switch (e.NoticeType)
+            {
+                case VpnStatusModel.NoticeType.Error:
+                    MessageBox.Show(e.Notice + "\n\nThe application will exit :(", "Cisco error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        Application.Current.Shutdown();
+                    });
+                    break;
+                case VpnStatusModel.NoticeType.Warning:
+                case VpnStatusModel.NoticeType.Info:
+                case VpnStatusModel.NoticeType.Status:
+                    Trace.TraceInformation($"Case {e.NoticeType.ToString()} ignored in CurrStatus_Notice.");
+                    break;
+            }
         }
 
         private void CurrStatus_GroupRequested(object sender, VpnStatusModel.GroupEventArgs e)
         {
-            var selectBox = new SelectGroupModalWindow(e.AvailableGroups);
-            bool? dr = selectBox.ShowDialog();
-            if (dr == true)
+            Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                e.SelectedGroup = selectBox.SelectedGroup;
-            }
+                var selectBox = new SelectGroupModalWindow(e.AvailableGroups);
+                bool? dr = selectBox.ShowDialog();
+                if (dr == true)
+                {
+                    e.SelectedGroup = selectBox.SelectedGroup;
+                }
+            }).Wait();
         }
 
         public string TimeConnected
